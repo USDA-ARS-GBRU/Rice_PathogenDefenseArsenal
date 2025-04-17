@@ -205,6 +205,9 @@ pathogens.SSR <- dataset.S3 |>
   dplyr::mutate_at(-1, as.integer) |>
   as.data.frame()
 
+# 6 obs excluded because they are before 1974
+# 11 excluded because they are missing state information
+
 pathogens <- dataset.S1 |>
   dplyr::select(1,2,3,4, 6:13) |>
   dplyr::filter(Year >= 1970, Year <= 2018, !is.na(State)) |>
