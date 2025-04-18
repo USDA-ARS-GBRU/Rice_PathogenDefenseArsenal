@@ -2,33 +2,47 @@ setwd("../../inputs")
 
 library(extrafont)
 
+AVR_Primer <- NULL
 Present <- NULL
+F <- NULL
+R <- NULL
 
+AVR <- read.table("../outputs/AVR_primer_counts_in_SRR.txt.gz", check.names = FALSE)
+meta <- read.table("SRR_meta.txt", header = TRUE, sep = "\t", check.names = FALSE) |>
+  dplyr::rename("Year_Collected" = "Year Collected")
 
-AVR <- readRDS(file = "pathogen.RDS")[, c(3, 5:12)] |>
-  tidyr::pivot_longer(-1, names_to = "AVR", values_to = "Detected") |>
-  dplyr::rename("Year_Collected" = "Year") |>
-  dplyr::mutate(AVR = stringr::str_replace_all(AVR, "AVR-ii", "AVR-Pii"))
+AVR.gt5 <- AVR >= 5L
+
+AVR.gt5.df <- AVR.gt5 |>
+  as.data.frame(check.names = FALSE) |>
+  tibble::rownames_to_column("ID") |>
+  tidyr::pivot_longer(-1, names_to = "AVR_Primer", values_to = "Present") |>
+  tidyr::separate(AVR_Primer, c("AVR", "Primer"), sep = "_") |>
+  tidyr::pivot_wider(names_from = "Primer", values_from = Present) |>
+  dplyr::mutate(Detected = `F` & `R`) |>
+  dplyr::mutate(Detected = Detected * 1L) |>
+  dplyr::left_join(meta, by = c("ID" = "SRR Sample ID"))
 
 # estimate some smooths from mgcv
-AVR.split <- split(AVR, AVR$AVR) |>
+AVR.split <- split(AVR.gt5.df, AVR.gt5.df$AVR) |>
   lapply(\(x) mgcv::gam(cbind(Detected, 1 - Detected) ~ 1 + s(Year_Collected, bs = "cs"),
                         data = x,
                         method = "REML",
                         family = "binomial")) |>
   lapply(predict,
-         newdata = data.frame(Year_Collected = 1970:2020),
+         newdata = data.frame(Year_Collected = 1950:2020),
          se.fit = TRUE,
          type = "response") |>
-  lapply(\(x) data.frame(Year_Collected = 1970:2020,
+  lapply(\(x) data.frame(Year_Collected = 1950:2020,
                          pred = x$fit |> unname(),
                          SE = x$se.fit |> unname())) |>
   purrr::list_rbind(names_to = "AVR")
 
+AVR <- AVR.gt5.df
 g <- ggplot2::ggplot(AVR,
-                ggplot2::aes(x = Year_Collected,
-                             group = AVR,
-                             y = Detected)) +
+                     ggplot2::aes(x = Year_Collected,
+                                  group = AVR,
+                                  y = Detected)) +
   ggplot2::geom_point(pch = 21, # dodge position vertically
                       size = 1,
                       alpha = 0.7,
@@ -63,10 +77,10 @@ g <- ggplot2::ggplot(AVR,
                              # values = viridisLite::plasma(2),
                              values = c("purple", "lightgrey"),
                              labels = c("Absent", "Present")) +
-  ggplot2::ggtitle("AVR Presence/Absence in Pathogen Samples, over Time")
+  ggplot2::ggtitle("AVR Presence/Absence in Pathogen Samples, over Time (NCBI Samples)")
 g
 ggplot2::ggsave(g,
-                filename = "../figures/AVR_over_time.png",
+                filename = "../figures/AVR-SRR_over_time.png",
                 width = 6,
                 height = 3,
                 dpi = 600,

@@ -144,7 +144,8 @@ g1 <- ggplot2::ggplot(post,
                                                    0.05,0.05,0.05,0.05), "lines"),
                  axis.text.x.bottom = ggplot2::element_blank(),
                  axis.ticks.x = ggplot2::element_blank(),
-                 axis.title.x = ggplot2::element_blank()) +
+                 axis.title.x = ggplot2::element_blank(),
+                 strip.text  = ggplot2::element_text(size = 7, family = "Arial", color = "black")) +
   ggplot2::scale_y_continuous(name = "Membership Probability", expand = c(0, 0)) +
   ggplot2::scale_x_discrete(expand = c(0, 0)) +
   ggh4x::facet_nested(~Decade+grp2, 
@@ -211,9 +212,9 @@ gp <- ggpubr::ggarrange(g1, g2, ncol = 1,
 
 ggplot2::ggsave(gp, 
        filename = "../figures/AVR_and_structure.png",
-       width = 7,
+       width = 4,
        height = 2,
        dpi = 600,
-       scale = 4,
+       scale = 3,
        units = "in")
 

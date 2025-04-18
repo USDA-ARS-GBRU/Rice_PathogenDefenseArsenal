@@ -35,7 +35,7 @@ g <- ggplot2::ggplot(data = d,
                              y = proportion,
                              group = State)) +
   ggplot2::geom_point(ggplot2::aes(fill = State),
-                      color = "black", alpha = 0.5, pch = 21) +
+                      color = "black", alpha = 0.5, pch = 21, size = 0.75) +
   ggplot2::theme_minimal() +
   ggplot2::theme(text = ggplot2::element_text(size = 14, family = "Arial", color = "black"),
                  legend.position = "inside",
@@ -43,6 +43,7 @@ g <- ggplot2::ggplot(data = d,
                  legend.position.inside = c(0.95, 0.85),
                  panel.spacing.x = ggplot2::unit(2, "lines")) +
   ggplot2::geom_line(data = d.loess,
+                     linewidth = 1,
              ggplot2::aes(x = Year,
                           y = Pred,
                           group = State,
@@ -50,7 +51,8 @@ g <- ggplot2::ggplot(data = d,
   ggplot2::scale_y_continuous(name = "Proportion of Rice Acres with R Gene",
                               limits = c(0, 1)) +
   ggplot2::scale_x_continuous(limits = c(1960L, 2020L)) +
-  ggplot2::facet_wrap(~R, nrow = 2)
+  ggplot2::facet_wrap(~R, nrow = 2) +
+  ggplot2::ggtitle("Rice R Gene Frequency by State")
 
 ggplot2::ggsave(g,
                 filename = "../figures/Rgenes_over_time.png",
