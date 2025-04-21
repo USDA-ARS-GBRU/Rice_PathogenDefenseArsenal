@@ -44,7 +44,9 @@ AA.Pita <- AA.Pita[, apply(AA.Pita, 2, \(x) length(table(x)) >= 2)]
 AA.Pita.int <- matchar_to_matint(AA.Pita)
 AA.Piks.int <- matchar_to_matint(AA.Piks)
 
-catFuncPtr <- RcppXPtrUtils::cppXPtr("double customDist(const arma::mat &A, const arma::mat &B) { return arma::accu(arma::square(A != B))/static_cast<double>(A.n_cols); }",
+catFuncPtr <- RcppXPtrUtils::cppXPtr("double customDist(const arma::mat &A, const arma::mat &B) {
+  return arma::accu(A != B)/static_cast<double>(A.n_cols);
+                                     }",
                       depends = c("RcppArmadillo"))
 
 
