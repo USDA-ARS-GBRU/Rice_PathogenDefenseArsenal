@@ -18,7 +18,7 @@ pathogen.SSR <- pathogen.SSR[rowSums(is.na(pathogen.SSR)) < 10, ]
 pathogen.SSR[is.na(pathogen.SSR)] <- -9
 
 pathogen.AVR <- data.matrix(pathogen[, c(5:12)])
-rownames(pathogen.AVR) <- pathogen$`Isolate name` 
+rownames(pathogen.AVR) <- pathogen$`Isolate name`
 pathogen.AVR <- pathogen.AVR[rownames(pathogen.SSR), ]
 
 
@@ -26,7 +26,7 @@ pathogen.AVR <- pathogen.AVR[rownames(pathogen.SSR), ]
 #   tibble::rownames_to_column("ID") |>
 #   dplyr::mutate(ID = stringr::str_replace_all(ID, "/", "")) |>
 #   dplyr::mutate(ID = stringr::str_replace_all(ID, " ", ""))
-# 
+#
 # colnames(pathogen.SSR)[1] <- ""
 
 write.table(pathogen.SSR,
@@ -41,7 +41,7 @@ genind <- adegenet::df2genind(pathogen.SSR, ploidy = 1, NA.char = "-9",
 
 set.seed(123)
 
-grp <- adegenet::find.clusters(genind, 
+grp <- adegenet::find.clusters(genind,
                                max.n.clust = 20,
                                n.pca = 1e5,
                                n.iter = 10000,
@@ -49,12 +49,12 @@ grp <- adegenet::find.clusters(genind,
                                choose.n.clus = FALSE,
                                criterion = "diffNgroup",
                                pca.center = TRUE,
-                               pca.scale = FALSE, 
+                               pca.scale = FALSE,
                                n.pca.cores = 1)
 
 grp
 
-dapc1 <- adegenet::dapc(genind, 
+dapc1 <- adegenet::dapc(genind,
                         grp$grp,
                         n.pca = 1e5,
                         n.da = 2,
@@ -66,7 +66,7 @@ dapc1 <- adegenet::dapc(genind,
 
 adegenet::scatter.dapc(dapc1,
                        col = viridisLite::magma(5),
-                       scree.da = TRUE, 
+                       scree.da = TRUE,
                        scree.pca = TRUE,
                        label = NULL,
                        mstree = TRUE,
@@ -83,7 +83,7 @@ posterior <- da.object$posterior
 
 names(dimnames(posterior)) <- c("sample", "population")
 
-to_merge <- data.frame(list(sample = dimnames(posterior)$sample, 
+to_merge <- data.frame(list(sample = dimnames(posterior)$sample,
                             oldPopulation = adegenet::pop(gid)))
 
 post <- reshape2::melt(posterior, value.name = "probability")
@@ -94,9 +94,19 @@ if (is.numeric(post$sample)) {
 if (is.numeric(post$population)) {
   post$population <- factor(post$population, levels = unique(sort(post$population)))
 }
+
+# from `ggcompoplot::`
+char2pal <- function (x, pal = rainbow)
+{
+  PAL <- match.fun(pal)
+  outPal <- PAL(length(unique(x)))
+  names(outPal) <- unique(x)
+  return(outPal)
+}
+
 if (length(pal) == 1) {
   PAL <- match.fun(pal)
-  pal <- ggcompoplot::char2pal(post$population, PAL)
+  pal <- char2pal(post$population, PAL)
 }
 
 post$Decade <- paste0(floor(pathogen.SSR.meta$Year[match(post$sample, pathogen.SSR.meta$`Isolate name`)] / 10) * 10,
@@ -120,7 +130,7 @@ post$population <- factor(xord[post$population])
 
 post$sample <- factor(as.character(post$sample),
                       levels = unique(dplyr::arrange(post,
-                                                     grp2, 
+                                                     grp2,
                                                      dplyr::desc(probability))$sample))
 
 g1 <- ggplot2::ggplot(post,
@@ -148,7 +158,7 @@ g1 <- ggplot2::ggplot(post,
                  strip.text  = ggplot2::element_text(size = 7, family = "Arial", color = "black")) +
   ggplot2::scale_y_continuous(name = "Membership Probability", expand = c(0, 0)) +
   ggplot2::scale_x_discrete(expand = c(0, 0)) +
-  ggh4x::facet_nested(~Decade+grp2, 
+  ggh4x::facet_nested(~Decade+grp2,
                       space = "free_x",
                       scales = "free_x",) +
   ggplot2::scale_fill_manual(name = "DAPC Cluster",
@@ -157,7 +167,7 @@ g1 <- ggplot2::ggplot(post,
 g1
 
 
-xord2 <- dist(t(pathogen.AVR)) |> hclust() 
+xord2 <- dist(t(pathogen.AVR)) |> hclust()
 xord2 <- rev(xord2$order)
 # now make the same plot, but this time with the AVR genes marked
 post2 <- post |>
@@ -170,7 +180,7 @@ post2 <- post |>
   tidyr::pivot_longer(-c(1:3), names_to = "AVR", values_to = "P") |>
   dplyr::mutate(sample = factor(sample, levels = unique(post$sample))) |>
   dplyr::mutate(P = ifelse(P == 0, "Absent", "Present")) |>
-  dplyr::mutate(AVR = factor(AVR, 
+  dplyr::mutate(AVR = factor(AVR,
                              levels = colnames(pathogen.AVR)[xord2]))
 
 
@@ -197,7 +207,7 @@ g2 <- ggplot2::ggplot(post2,
                  # axis.title.y = ggplot2::element_blank(),
                  panel.background = ggplot2::element_blank()) +
   ggplot2::scale_x_discrete(expand = c(0, 0)) +
-  ggh4x::facet_nested(~Decade+grp2, 
+  ggh4x::facet_nested(~Decade+grp2,
                       space = "free_x",
                       scales = "free_x") +
   ggplot2::scale_fill_manual(name = "AVR Status",
@@ -210,7 +220,7 @@ gp <- ggpubr::ggarrange(g1, g2, ncol = 1,
                   heights = c(2,1),
                   align = "v")
 
-ggplot2::ggsave(gp, 
+ggplot2::ggsave(gp,
        filename = "../figures/AVR_and_structure.png",
        width = 4,
        height = 2,
