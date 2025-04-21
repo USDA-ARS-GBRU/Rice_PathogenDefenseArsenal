@@ -2,6 +2,17 @@ setwd("../../inputs")
 
 library(extrafont)
 
+matchar_to_matint <- function(mat) {
+  return(mat |>
+    data.frame() |>
+    dplyr::mutate(dplyr::across(dplyr::everything(),
+                                forcats::fct_infreq)) |>
+    dplyr::mutate(dplyr::across(dplyr::everything(),
+                                as.integer)) |>
+    data.frame() |>
+    as.matrix())
+}
+
 SRR.meta <- read.table("SRR_meta.txt", sep = "\t", header = TRUE, check.names = FALSE)
 Wang.meta <- readRDS("pathogen.RDS")[, c(1:4)]
 
@@ -24,4 +35,30 @@ colnames(AA.Piks) <- paste0("codon_", c(46, 47, 48, 78))
 AA.Pita <- pep.Pita.mat[, c(83, 119, 192, 207)]
 colnames(AA.Pita) <- paste0("codon_",  c(83, 119, 192, 207))
 
+AA.Piks <- pep.Piks.mat
+AA.Pita <- pep.Pita.mat
+
+AA.Piks <- AA.Piks[, apply(AA.Piks, 2, \(x) length(table(x)) >= 2)]
+AA.Pita <- AA.Pita[, apply(AA.Pita, 2, \(x) length(table(x)) >= 2)]
+
+AA.Pita.int <- matchar_to_matint(AA.Pita)
+AA.Piks.int <- matchar_to_matint(AA.Piks)
+
+catFuncPtr <- RcppXPtrUtils::cppXPtr("double customDist(const arma::mat &A, const arma::mat &B) { return arma::accu(arma::square(A != B))/static_cast<double>(A.n_cols); }",
+                      depends = c("RcppArmadillo"))
+
+
+AA.Pita.dist <- parallelDist::parDist(AA.Pita.int, method="custom", func = catFuncPtr)
+AA.Piks.dist <- parallelDist::parDist(AA.Piks.int, method="custom", func = catFuncPtr)
+
+AA.Pita.dist.toplot <- AA.Pita.dist |> as.dist()
+AA.Pita.dist.toplot[AA.Pita.dist.toplot > 0.20] <- 0.20
+pheatmap::pheatmap(AA.Pita.dist.toplot)
+
+AA.Piks.dist.toplot <- AA.Piks.dist |> as.dist()
+AA.Piks.dist.toplot[AA.Piks.dist.toplot > 0.20] <- 0.20
+pheatmap::pheatmap(AA.Piks.dist.toplot)
+
+hclust(AA.Pita.dist) |>
+  plot()
 
