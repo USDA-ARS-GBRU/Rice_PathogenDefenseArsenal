@@ -1,4 +1,5 @@
-setwd("../../inputs")
+here::i_am("scripts/R/plot_evolution.R")
+
 
 library(extrafont)
 
@@ -13,17 +14,22 @@ matchar_to_matint <- function(mat) {
     as.matrix())
 }
 
-SRR.meta <- read.table("SRR_meta.txt", sep = "\t", header = TRUE, check.names = FALSE)
-Wang.meta <- readRDS("pathogen.RDS")[, c(1:4)]
+SRR.meta <- read.table(here::here("inputs", "SRR_meta.txt"),
+                       sep = "\t", header = TRUE, check.names = FALSE)
+Wang.meta <- readRDS(here::here("inputs", "pathogen.RDS"))[, c(1:4)]
 
-pep.Piks <- read.table("../sequences/AVR_Alignments/Piks/pep.aln.txt",
+pep.Piks <- read.table(here::here("sequences",
+                                  "AVR_Alignments",
+                                  "Piks", "pep.aln.txt"),
                        header = FALSE, sep = "\t")
 
 pep.Piks.mat <- do.call(rbind, pep.Piks$V2 |> strsplit(""))
 rownames(pep.Piks.mat) <- pep.Piks$V1
 
 
-pep.Pita <- read.table("../sequences/AVR_Alignments/Pita1/pep.aln.txt",
+pep.Pita <- read.table(here::here("sequences",
+                                  "AVR_Alignments",
+                                  "Pita1", "pep.aln.txt"),
                        header = FALSE, sep = "\t", comment.char = "")
 
 pep.Pita.mat <- do.call(rbind, pep.Pita$V2 |> strsplit(""))
@@ -61,6 +67,6 @@ AA.Piks.dist.toplot <- AA.Piks.dist |> as.dist()
 AA.Piks.dist.toplot[AA.Piks.dist.toplot > 0.20] <- 0.20
 pheatmap::pheatmap(AA.Piks.dist.toplot)
 
-hclust(AA.Pita.dist) |>
+hclust(AA.Pita.dist, method = "complete") |>
   plot()
 
