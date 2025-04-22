@@ -1,5 +1,15 @@
 here::i_am("scripts/R/plot_evolution.R")
 
+# clustalw2
+# GENE=Piks
+# GENE=Pita1
+# cd ${GENE}
+# awk -v OFS="\t" '{printf("%s\tseq%05d\n", $1, NR)}' ../../AVR_Alignments/${GENE}/pep.aln.txt  > seqnames.txt
+# paste <(cut -f2 seqnames.txt) <(cut -f2 ../../AVR_Alignments/${GENE}/pep.aln.txt) | seqkit tab2fx > pep.aln.fasta
+# seqret -sequence pep.aln.fasta -outseq "phylip::pep.phy"
+# mpirun -np 20 phyml-mpi --datatype aa --input pep.phy --leave_duplicates --r_seed 1234
+# cd ..
+
 
 library(extrafont)
 
@@ -44,12 +54,15 @@ colnames(AA.Pita) <- paste0("codon_",  c(83, 119, 192, 207))
 AA.Piks <- pep.Piks.mat
 AA.Pita <- pep.Pita.mat
 
+# keep only sites with at least two amino acids
 AA.Piks <- AA.Piks[, apply(AA.Piks, 2, \(x) length(table(x)) >= 2)]
 AA.Pita <- AA.Pita[, apply(AA.Pita, 2, \(x) length(table(x)) >= 2)]
 
+# convert into integer for clustering
 AA.Pita.int <- matchar_to_matint(AA.Pita)
 AA.Piks.int <- matchar_to_matint(AA.Piks)
 
+# custom distance function (pointer)
 catFuncPtr <- RcppXPtrUtils::cppXPtr("double customDist(const arma::mat &A, const arma::mat &B) {
   return arma::accu(A != B)/static_cast<double>(A.n_cols);
                                      }",
@@ -70,3 +83,5 @@ pheatmap::pheatmap(AA.Piks.dist.toplot)
 hclust(AA.Pita.dist, method = "complete") |>
   plot()
 
+hclust(AA.Piks.dist, method = "complete") |>
+  plot()
