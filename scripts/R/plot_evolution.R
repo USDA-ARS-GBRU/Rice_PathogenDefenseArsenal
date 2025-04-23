@@ -10,6 +10,18 @@ here::i_am("scripts/R/plot_evolution.R")
 # mpirun -np 20 phyml-mpi --datatype aa --input pep.phy --leave_duplicates --r_seed 1234
 # cd ..
 
+labs <- read.table(here::here("sequences", "AVR_Trees", "Pita1", "seqnames.txt"),
+                   header = FALSE, col.names = c("NewName", "OldName"),
+                   comment.char = "")
+
+tr <- ape::read.tree(here::here("sequences", "AVR_Trees", "Pita1", "pep.phy_phyml_tree.txt"))
+tr$tip.label <- labs$NewName[match(tr$tip.label, labs$OldName)]
+
+plot(tr)
+
+ape::root(tr, "DRR059891") |>
+  plot(type =  "phylo", # "fan",
+       cex = 0.4, font = 1)
 
 library(extrafont)
 
