@@ -1,29 +1,58 @@
 here::i_am("scripts/R/plot_evolution.R")
 
-labs <- read.table(here::here("sequences", "AVR_Trees", "Pita1", "seqnames.txt"),
+Country = NULL
+meta <- read.table(here::here("inputs", "meta_combined.txt"), header = TRUE,
+                   comment.char = "", sep = "\t") |>
+  dplyr::mutate(Domestic = factor(Country == "USA", levels = c("TRUE", "FALSE")))
+
+gene <- "Pita1"
+gene <- "Piks"
+
+seq <- NULL
+labs <- read.table(here::here("sequences", "AVR_Trees", gene, "seqnames.txt"),
                    header = FALSE, col.names = c("NewName", "OldName"),
                    comment.char = "")
 
-tr <- ape::read.tree(here::here("sequences", "AVR_Trees", "Pita1", "pep.phy_phyml_tree.txt"))
+tr <- ape::read.tree(here::here("sequences", "AVR_Trees", gene, "pep.phy_phyml_tree.txt"))
+
+
+if (gene == "Pita1") {
+  tr <- ape::drop.tip(tr, c("seq00003", "seq00570", "seq00557"))
+}
+
+if (gene == "Piks") {
+  tr <- ape::drop.tip(tr, c("seq00491"))
+}
+
+# get the unique sequences
+tokeep <- read.table(here::here("sequences", "AVR_Trees", gene, "pep.aln.txt"),
+                     header = FALSE, col.names = c("sample", "seq")) |>
+  dplyr::distinct(seq, .keep_all = TRUE)
+
+tr <- ape::drop.tip(tr, tr$tip.label[!tr$tip.label %in% tokeep$sample])
+
 tr$tip.label <- labs$NewName[match(tr$tip.label, labs$OldName)]
+cols <- c("red", "black")[meta$Domestic[match(tr$tip.label, meta$Sample)]]
+cols[is.na(cols)] <- "grey"
 
-plot(tr)
-
-ape::root(tr, "DRR059891") |>
-  plot(type =  "phylo", # "fan",
-       cex = 0.4, font = 1)
+tr$edge.length[tr$edge.length <= 0.000001] <- 0.0
+plot(tr, type = "fan",
+     # use.edge.length = FALSE,
+     show.tip.label = FALSE
+     )
+ape::tiplabels(pch = 19, col = cols, cex = 0.5)
 
 library(extrafont)
 
 matchar_to_matint <- function(mat) {
   return(mat |>
-    data.frame() |>
-    dplyr::mutate(dplyr::across(dplyr::everything(),
-                                forcats::fct_infreq)) |>
-    dplyr::mutate(dplyr::across(dplyr::everything(),
-                                as.integer)) |>
-    data.frame() |>
-    as.matrix())
+           data.frame() |>
+           dplyr::mutate(dplyr::across(dplyr::everything(),
+                                       forcats::fct_infreq)) |>
+           dplyr::mutate(dplyr::across(dplyr::everything(),
+                                       as.integer)) |>
+           data.frame() |>
+           as.matrix())
 }
 
 SRR.meta <- read.table(here::here("inputs", "SRR_meta.txt"),
@@ -68,7 +97,7 @@ AA.Piks.int <- matchar_to_matint(AA.Piks)
 catFuncPtr <- RcppXPtrUtils::cppXPtr("double customDist(const arma::mat &A, const arma::mat &B) {
   return arma::accu(A != B)/static_cast<double>(A.n_cols);
                                      }",
-                      depends = c("RcppArmadillo"))
+                                     depends = c("RcppArmadillo"))
 
 
 AA.Pita.dist <- parallelDist::parDist(AA.Pita.int, method="custom", func = catFuncPtr)

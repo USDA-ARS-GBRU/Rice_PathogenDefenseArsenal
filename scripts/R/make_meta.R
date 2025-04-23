@@ -8,13 +8,13 @@ meta <- read.table(here::here("sequences", "meta.txt"), header = FALSE,
                    comment.char = "", col.names = "Sample")
 
 Pita1 <- read.table(here::here("sequences", "AVR_Trees", "Pita1", "seqnames.txt"),
-                   header =FALSE, comment.char = "")$V1
+                   header = FALSE, comment.char = "")$V1
 Piks <- read.table(here::here("sequences", "AVR_Trees", "Piks", "seqnames.txt"),
-                   header =FALSE, comment.char = "")$V1
+                   header = FALSE, comment.char = "")$V1
 meta$Pita <- meta$Sample %in% Pita1
 meta$Piks <- meta$Sample %in% Piks
 
-SRR.meta <- read.table(here::here("inputs", "SRR_meta.txt"), header = TRUE, sep ="\t",
+SRR.meta <- read.table(here::here("inputs", "SRR_meta.txt"), header = TRUE, sep = "\t",
                        check.names = FALSE, col.names = c("PRJNA", "Sample", "Year", "Country"))[, -c(1)] |>
   tibble::add_column("State" = NA_character_, .after = 3)
 
@@ -48,7 +48,7 @@ meta.more <- read.csv(here::here("..", "Rice_PathogenDefenseArsenal_Working",
   dplyr::select(Sample, Year, Country) |>
   dplyr::mutate(State = NA_character_) |>
   dplyr::mutate(Country = ifelse(Country == "US", "USA", Country)) |>
-  dplyr::filter(! Sample %in% meta2$Sample)
+  dplyr::filter(!Sample %in% meta2$Sample)
 
 
 meta.more2 <- read.csv(here::here("..", "Rice_PathogenDefenseArsenal_Working",
@@ -64,8 +64,8 @@ meta.more2 <- read.csv(here::here("..", "Rice_PathogenDefenseArsenal_Working",
   dplyr::mutate(Country = "USA") |>
   dplyr::select(Sample, Year, Country) |>
   dplyr::mutate(State = NA_character_) |>
-  dplyr::filter(! Sample %in% meta.more$Sample,
-                ! Sample %in% meta2$Sample)
+  dplyr::filter(!Sample %in% meta.more$Sample,
+                !Sample %in% meta2$Sample)
 
 meta2 <- rbind(meta2, rbind(meta.more, meta.more2))
 meta2$Year <- as.integer(meta2$Year)
