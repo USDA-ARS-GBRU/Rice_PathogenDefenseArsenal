@@ -29,7 +29,7 @@ tokeep <- read.table(here::here("sequences", "AVR_Trees", gene, "pep.aln.txt"),
                      header = FALSE, col.names = c("sample", "seq")) |>
   dplyr::distinct(seq, .keep_all = TRUE)
 
-tr <- ape::drop.tip(tr, tr$tip.label[!tr$tip.label %in% tokeep$sample])
+# tr <- ape::drop.tip(tr, tr$tip.label[!tr$tip.label %in% tokeep$sample])
 
 tr$tip.label <- labs$NewName[match(tr$tip.label, labs$OldName)]
 cols <- c("red", "black")[meta$Domestic[match(tr$tip.label, meta$Sample)]]
