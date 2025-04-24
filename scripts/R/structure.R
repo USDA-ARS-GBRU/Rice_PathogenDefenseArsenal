@@ -1,6 +1,7 @@
-setwd("../../inputs")
+here::i_am("scripts/R/structure.R")
+
 library(extrafont)
-extrafont::font_import()
+extrafont::font_import(prompt = FALSE)
 
 
 ID <- NULL
@@ -8,8 +9,10 @@ Decade <- NULL
 P <- NULL
 AVR <- NULL
 probability <- NULL
+oldPopulation <- NULL
+s1 <- s2 <- s3 <- s4 <- s5 <- NULL
 
-pathogen <- readRDS("pathogen.RDS")
+pathogen <- readRDS(here::here("inputs", "pathogen.RDS"))
 
 pathogen.SSR <- data.matrix(pathogen[, c(13:22)])
 rownames(pathogen.SSR) <- pathogen$`Isolate name`
@@ -30,7 +33,7 @@ pathogen.AVR <- pathogen.AVR[rownames(pathogen.SSR), ]
 # colnames(pathogen.SSR)[1] <- ""
 
 write.table(pathogen.SSR,
-            "structure.str", sep = "\t",
+            file = here::here("inputs", "structure.str"), sep = "\t",
             quote = FALSE, row.names = TRUE, col.names = TRUE)
 
 pathogen.SSR.meta <- pathogen[match(rownames(pathogen.SSR), pathogen$`Isolate name`), 1:12]
@@ -221,10 +224,19 @@ gp <- ggpubr::ggarrange(g1, g2, ncol = 1,
                   align = "v")
 
 ggplot2::ggsave(gp,
-       filename = "../figures/AVR_and_structure.png",
+       filename = here::here("figures", "AVR_and_structure.png"),
        width = 4,
        height = 2,
        dpi = 600,
        scale = 3,
        units = "in")
 
+# save membership probabilities
+post |>
+  tidyr::pivot_wider(names_from = "population", values_from = "probability", names_prefix = "s") |>
+  dplyr::select(sample, Decade, oldPopulation, grp2, s1, s2, s3, s4, s5) |>
+  setNames(c("Sample", "Decade", "State", "Most Likely Population",
+             "Subpop 1", "Subpop 2", "Subpop 3", "Subpop 4", "Subpop 5")) |>
+  dplyr::mutate(dplyr::across(dplyr::starts_with("Subpop"), \(x) round(x, 4))) |>
+  write.csv(file = here::here("outputs", "subpopulations.csv"),
+            row.names = FALSE, quote = FALSE)

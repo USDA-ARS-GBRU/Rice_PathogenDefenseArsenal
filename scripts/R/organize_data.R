@@ -1,15 +1,16 @@
-setwd("../../inputs")
+here::i_am("scripts/R/organize_data.R")
 
-dataset.S1 <- readxl::read_xlsx("NP Dataset S1.xlsx", range = "A6:M846", 
+dataset.S1 <- readxl::read_xlsx(here::here("inputs", "NP Dataset S1.xlsx"), range = "A6:M846",
                                 na = c("NA", "-", ""))
-dataset.S2.A <- readxl::read_xlsx("NP Dataset S2.xlsx", range = "A7:D1778",
+dataset.S2.A <- readxl::read_xlsx(here::here("inputs", "NP Dataset S2.xlsx"), range = "A7:D1778",
                                   na = c("NA", "NAc"))
-dataset.S2.B <- readxl::read_xlsx("NP Dataset S2.xlsx", range = "J7:L179")
+dataset.S2.B <- readxl::read_xlsx(here::here("inputs", "NP Dataset S2.xlsx"), range = "J7:L179")
 
-dataset.S3 <- readxl::read_xlsx("NP Dataset S3.xlsx", range = "A7:S400",
+dataset.S3 <- readxl::read_xlsx(here::here("inputs", "NP Dataset S3.xlsx"), range = "A7:S400",
                                 .name_repair = ~ vctrs::vec_as_names(..., repair = "unique", quiet = TRUE))
-table.S2 <- readxl::read_xlsx("Table S2.xlsx")
+table.S2 <- readxl::read_xlsx(here::here("inputs", "Table S2.xlsx"))
 
+# set column name references to NULL to avoid warnings
 Varieties <- NULL
 Year <- NULL
 acres <- NULL
@@ -77,8 +78,8 @@ dataset.S2.A.split$TX[, as.character(1985:1989)] <- dataset.S2.A.split$TX[, as.c
 xat <- colnames(dataset.S2.A.split$AR)
 
 dataset.S2.A.split <- lapply(dataset.S2.A.split,
-                    \(z) apply(z, 1, \(r) approx(x = xat, 
-                                      y = r, 
+                    \(z) apply(z, 1, \(r) approx(x = xat,
+                                      y = r,
                                       xout = 1960:2018, rule = 2)$y) |>
            t()) |>
   lapply(\(z) {colnames(z) <- 1960:2018 ; return(z)}) |>
@@ -104,7 +105,7 @@ rice$Rgenes[] <- as.integer(rice$Rgenes)
 rownames(rice$Rgenes) <- table.S2$Cultivars
 
 # set all blanks to zero, but only if the row is not "unpublished"
-rice$Rgenes[which(is.na(rice$Rgenes), arr.ind = TRUE)] <- 0L 
+rice$Rgenes[which(is.na(rice$Rgenes), arr.ind = TRUE)] <- 0L
 rice$Rgenes[grepl("unpublished", table.S2$`References and notes`), ] <- NA_integer_
 rice$Rgenes <- rice$Rgenes[sort(rownames(rice$Rgenes)), ]
 
@@ -193,7 +194,7 @@ rice$Racreage.prop.known.bystate <- lapply(rice$Racreage.bystate,
 
 
 ### create the dataset for the pathogen
-# set 
+# set
 # FL -> TX
 # MO -> AR
 # TN -> AR
@@ -211,11 +212,11 @@ pathogens.SSR <- dataset.S3 |>
 pathogens <- dataset.S1 |>
   dplyr::select(1,2,3,4, 6:13) |>
   dplyr::filter(Year >= 1970, Year <= 2018, !is.na(State)) |>
-  dplyr::mutate(State = stringr::str_replace_all(State, 
+  dplyr::mutate(State = stringr::str_replace_all(State,
                                                  "FL", "TX")) |>
-  dplyr::mutate(State = stringr::str_replace_all(State, 
+  dplyr::mutate(State = stringr::str_replace_all(State,
                                                  "MO", "AR")) |>
-  dplyr::mutate(State = stringr::str_replace_all(State, 
+  dplyr::mutate(State = stringr::str_replace_all(State,
                                                  "TN", "AR")) |>
   dplyr::filter(State %in% c("AR", "LA", "MS", "TX")) |>
   as.data.frame() |>
@@ -229,12 +230,12 @@ xat <- colnames(rice$Racreage.prop.known.bystate$AR$resistant)
 
 rice$Racreage.prop.known.bystate.interpol <- lapply(rice$Racreage.prop.known.bystate,
                                             \(z1) lapply(z1,
-                             \(z) apply(z, 1, \(r) approx(x = xat, 
-                                                          y = r, 
+                             \(z) apply(z, 1, \(r) approx(x = xat,
+                                                          y = r,
                                                           xout = 1960:2018, rule = 2)$y) |>
                                t()) |>
   lapply(\(z) {colnames(z) <- 1960:2018 ; return(z)}))
 
-saveRDS(rice, file = "rice.RDS") 
-saveRDS(pathogens, file = "pathogen.RDS") 
+saveRDS(rice, file = here::here("inputs", "rice.RDS"))
+saveRDS(pathogens, file = here::here("inputs", "pathogen.RDS"))
 
