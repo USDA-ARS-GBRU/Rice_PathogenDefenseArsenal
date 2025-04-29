@@ -122,130 +122,124 @@ hclust(AA.Piks.dist, method = "complete") |>
 
 ####
 # read in a coding sequence MSA
-seqs <- adegenet::fasta2DNAbin(here::here("sequences", "AVR_Alignments", "Pita1", "cds.aln.fasta"))
+plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pita1", "cds.aln.fasta"),
+                             img = here::here("figures", "Pita1.png"),
+                             metadata = meta) {
+  seqs <- adegenet::fasta2DNAbin(fa)
 
-# extract all of the individual haplotype sequences
-haplo <- pegas::haplotype(seqs,
-                          trailingGapsAsN = FALSE,
-                          strict = FALSE)
+  # extract all of the individual haplotype sequences
+  haplo <- pegas::haplotype(seqs,
+                            trailingGapsAsN = FALSE,
+                            strict = FALSE)
 
-# rename haplotype sequences from roman numberals to VXXX
-attr(haplo, "dimnames")[[1]] <- paste0("V",
-                                       stringr::str_pad(seq_along(attr(haplo, "dimnames")[[1]]),
-                                                        width = 3, pad = "0"))
+  # rename haplotype sequences from roman numberals to VXXX
+  attr(haplo, "dimnames")[[1]] <- paste0("V",
+                                         stringr::str_pad(seq_along(attr(haplo, "dimnames")[[1]]),
+                                                          width = 3, pad = "0"))
 
-# get the groupings
-haplo.index.list <- attr(haplo, "index")
-names(haplo.index.list) <- dimnames(haplo)[[1]]
+  # get the groupings
+  haplo.index.list <- attr(haplo, "index")
+  names(haplo.index.list) <- dimnames(haplo)[[1]]
 
-# check if any of the samples from the US
-# RED = only US
-# BLUE = only non-US
-# BLACK = combination
-cols <- lapply(haplo.index.list, \(x) dimnames(seqs)[[1]][x]) |>
-  sapply(\(x) x %in% meta$Sample[meta$Domestic]) |>
-  sapply(\(x) ifelse(all(x), "salmon2",
-                     ifelse(all(!x), "lightblue", "orchid")))
+  # check if any of the samples from the US
+  # RED = only US
+  # BLUE = only non-US
+  # BLACK = combination
+  cols <- lapply(haplo.index.list, \(x) dimnames(seqs)[[1]][x]) |>
+    sapply(\(x) x %in% metadata$Sample[metadata$Domestic]) |>
+    sapply(\(x) ifelse(all(x), "salmon2",
+                       ifelse(all(!x), "lightblue", "orchid")))
 
-hnd <- ape::dist.dna(haplo, model = "N")
+  # get the pairwise distances
+  hnd <- ape::dist.dna(haplo, model = "N")
 
-hnp <- pegas::haploNet(haplo, hnd, getProb = FALSE)
+  # construct the haplotype network
+  hnp <- pegas::haploNet(haplo, hnd, getProb = FALSE)
 
-# figure out labels
-# red if haplotype is found in US, false otherwise
+  # figure out labels
+  # red if haplotype is found in US, false otherwise
 
-cols <- cols[attr(hnp, "labels")]
-sizes <- attr(hnp, "freq")
-names(sizes) <- attr(hnp, "labels")
+  # reorder items to match the haplotype network
+  cols <- cols[attr(hnp, "labels")]
+  sizes <- attr(hnp, "freq")
+  names(sizes) <- attr(hnp, "labels")
 
-p <- plot(hnp,
-     size = sqrt(attr(hnp, "freq")),
-     col = cols,
-     show.mutation=1, scale.ratio=1.2,cex=0.6,threshold=0,lwd=0.8, fast = TRUE)
+  p <- plot(hnp,
+       size = sqrt(attr(hnp, "freq")),
+       col = cols,
+       show.mutation=1, scale.ratio=1.2,cex=0.6,threshold=0,lwd=0.8, fast = TRUE)
 
-as.igraph.haploNet <- function(x, directed = FALSE, use.labels = TRUE,
-         altlinks = TRUE, ...)
-{
-  y <- x[, 1:2]
-  if (altlinks) y <- rbind(y, attr(x, "alter.links")[, 1:2])
-  y <-
-    if (use.labels) matrix(attr(x, "labels")[y], ncol = 2)
-  else y - 1L
-  igraph::graph_from_edgelist(y, directed = directed, ...)
-}
+  # p
 
+  # modified version of pegas:::as.igraph.haploNet
+  # because it wasn't working correctly otherwise
+  as.igraph.haploNet <- function(x, directed = FALSE, use.labels = TRUE,
+           altlinks = TRUE, ...)
+  {
+    y <- x[, 1:2]
+    if (altlinks) y <- rbind(y, attr(x, "alter.links")[, 1:2])
+    y <-
+      if (use.labels) matrix(attr(x, "labels")[y], ncol = 2)
+    else y - 1L
+    igraph::graph_from_edgelist(y, directed = directed, ...)
+  }
 
-ig <- as.igraph.haploNet(hnp, directed = FALSE, altlinks = FALSE)
+  # convert the haplotype network to an igraph object
+  ig <- as.igraph.haploNet(hnp, directed = FALSE, altlinks = FALSE)
 
-nm <- igraph::vertex.attributes(ig)$name
+  # get the names of the vertices in the igraph
+  nm <- igraph::vertex.attributes(ig)$name
 
-igraph::V(ig)$size <- (sizes[nm] + 10)*4
-igraph::V(ig)$size2 <- (sizes[nm] + 10)*4
-igraph::E(ig)
+  # set the sizes of the nodes to be a minimum of 11
+  # ie, number of times the sequence is seen plus 10
+  # and then rescale by 5x (this seemed to work well for this dataset
+  igraph::V(ig)$size <- (sizes[nm] + 10)*6
+  igraph::V(ig)$size2 <- (sizes[nm] + 10)*6
 
-set.seed(123456)
-lay <- igraph::layout_nicely(ig)
+  # set the seed for the (rotational aspect? of the) layout
+  set.seed(1234)
+  lay <- igraph::layout_with_fr(ig)
 
-par(new = TRUE)
-plot(ig,
-     xlim = range(lay[, 1]),
-     ylim = range(lay[, 2]),
-     layout = lay,
-     vertex.color = cols[nm],
-     vertex.frame.color = cols[nm],
-     rescale = FALSE,
-     # asp = 0,
-     vertex.label.color = "black",
-     vertex.label.dist = 0,
-     vertex.label.degree = -pi/4)
+  cols <- lapply(haplo.index.list, \(x) dimnames(seqs)[[1]][x]) |>
+    lapply(\(x) c(sum(x %in% metadata$Sample[metadata$Domestic]),
+                  sum(!x %in% metadata$Sample[metadata$Domestic])))
 
-plot(ig,
-     xlim = range(lay[, 1]),
-     ylim = range(lay[, 2]),
-     layout = lay,
-     vertex.size = 0,
-     rescale = FALSE,
-     # asp = 0,
-     vertex.label.color = "black",
-     vertex.label.dist = 0,
-     vertex.label.degree = -pi/4, add = TRUE)
+  cols <- cols[attr(hnp, "labels")]
 
+  # rescale layout to have equal height and width
+  lay <- scale(lay)*15
 
-cols <- lapply(haplo.index.list, \(x) dimnames(seqs)[[1]][x]) |>
-  lapply(\(x) c(sum(x %in% meta$Sample[meta$Domestic]),
-                sum(!x %in% meta$Sample[meta$Domestic])))
+  png(img, width = 7, height = 7, units = "in", res = 600, pointsize = 7)
+  par(bg = NA)
+  par(mar = c(0, 0, 0, 0))
+  plot(ig,
+       xlim = range(lay[, 1]),
+       ylim = range(lay[, 2]),
+       layout = lay,
+       vertex.shape = "pie",
+       vertex.pie = cols[nm],
+       vertex.pie.color = lapply(cols[nm], \(x) c("salmon2", "lightblue")[x > 0]),
+       # vertex.pie.density = 1,
+       rescale = FALSE,
+       # asp = 0,
+       vertex.label = NA)
 
-cols
-cols <- cols[attr(hnp, "labels")]
+  plot(ig,
+       xlim = range(lay[, 1]),
+       ylim = range(lay[, 2]),
+       layout = lay,
+       vertex.size = 0,
+       rescale = FALSE,
+       vertex.label.cex = 0.75,
+       vertex.label.color = "black",
+       vertex.label.dist = 12,
+       vertex.label.degree = -pi/2,
+       add = TRUE)
+  dev.off()
+  }
 
+plot_msa_network(fa = here::here("sequences", "AVR_Alignments", "Pita1", "cds.aln.fasta"),
+                 img = here::here("figures", "haplotype_network_Pita1.png"))
 
-set.seed(1234)
-lay <- igraph::layout_with_fr(ig)
-
-
-plot(ig,
-     xlim = range(lay[, 1]),
-     ylim = range(lay[, 2]),
-     layout = lay,
-     vertex.shape = "pie",
-     vertex.pie = cols[nm],
-     vertex.pie.color = lapply(cols, \(x) c("salmon2", "lightblue")[x > 0]),
-     rescale = FALSE,
-     # asp = 0,
-     vertex.label.color = "black",
-     vertex.label.dist = 12,
-     vertex.label.degree = -pi/4)
-
-plot(ig,
-     xlim = range(lay[, 1]),
-     ylim = range(lay[, 2]),
-     layout = lay,
-     vertex.size = 0,
-     rescale = FALSE,
-     # asp = 0,
-     vertex.label = NA,
-     vertex.label.color = "black",
-     vertex.label.dist = 0,
-     vertex.label.degree = -pi/4, add = TRUE)
-
-
+plot_msa_network(fa = here::here("sequences", "AVR_Alignments", "Piks", "cds.aln.fasta"),
+                 img = here::here("figures", "haplotype_network_Piks.png"))
