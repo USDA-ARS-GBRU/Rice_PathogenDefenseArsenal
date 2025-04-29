@@ -3,7 +3,7 @@ here::i_am("scripts/R/plot_evolution.R")
 Country = NULL
 meta <- read.table(here::here("inputs", "meta_combined.txt"), header = TRUE,
                    comment.char = "", sep = "\t") |>
-  dplyr::mutate(Domestic = factor(Country == "USA", levels = c("TRUE", "FALSE")))
+  dplyr::mutate(Domestic = ifelse(Country == "USA", TRUE, FALSE))
 
 gene <- "Pita1"
 gene <- "Piks"
@@ -29,7 +29,7 @@ tokeep <- read.table(here::here("sequences", "AVR_Trees", gene, "pep.aln.txt"),
                      header = FALSE, col.names = c("sample", "seq")) |>
   dplyr::distinct(seq, .keep_all = TRUE)
 
-# tr <- ape::drop.tip(tr, tr$tip.label[!tr$tip.label %in% tokeep$sample])
+tr <- ape::drop.tip(tr, tr$tip.label[!tr$tip.label %in% tokeep$sample])
 
 tr$tip.label <- labs$NewName[match(tr$tip.label, labs$OldName)]
 cols <- c("red", "black")[meta$Domestic[match(tr$tip.label, meta$Sample)]]
@@ -41,6 +41,8 @@ plot(tr, type = "fan",
      show.tip.label = FALSE
      )
 ape::tiplabels(pch = 19, col = cols, cex = 0.5)
+
+plot(tr, use.edge.length = FALSE)
 
 library(extrafont)
 
@@ -116,3 +118,134 @@ hclust(AA.Pita.dist, method = "complete") |>
 
 hclust(AA.Piks.dist, method = "complete") |>
   plot()
+
+
+####
+# read in a coding sequence MSA
+seqs <- adegenet::fasta2DNAbin(here::here("sequences", "AVR_Alignments", "Pita1", "cds.aln.fasta"))
+
+# extract all of the individual haplotype sequences
+haplo <- pegas::haplotype(seqs,
+                          trailingGapsAsN = FALSE,
+                          strict = FALSE)
+
+# rename haplotype sequences from roman numberals to VXXX
+attr(haplo, "dimnames")[[1]] <- paste0("V",
+                                       stringr::str_pad(seq_along(attr(haplo, "dimnames")[[1]]),
+                                                        width = 3, pad = "0"))
+
+# get the groupings
+haplo.index.list <- attr(haplo, "index")
+names(haplo.index.list) <- dimnames(haplo)[[1]]
+
+# check if any of the samples from the US
+# RED = only US
+# BLUE = only non-US
+# BLACK = combination
+cols <- lapply(haplo.index.list, \(x) dimnames(seqs)[[1]][x]) |>
+  sapply(\(x) x %in% meta$Sample[meta$Domestic]) |>
+  sapply(\(x) ifelse(all(x), "salmon2",
+                     ifelse(all(!x), "lightblue", "orchid")))
+
+hnd <- ape::dist.dna(haplo, model = "N")
+
+hnp <- pegas::haploNet(haplo, hnd, getProb = FALSE)
+
+# figure out labels
+# red if haplotype is found in US, false otherwise
+
+cols <- cols[attr(hnp, "labels")]
+sizes <- attr(hnp, "freq")
+names(sizes) <- attr(hnp, "labels")
+
+p <- plot(hnp,
+     size = sqrt(attr(hnp, "freq")),
+     col = cols,
+     show.mutation=1, scale.ratio=1.2,cex=0.6,threshold=0,lwd=0.8, fast = TRUE)
+
+as.igraph.haploNet <- function(x, directed = FALSE, use.labels = TRUE,
+         altlinks = TRUE, ...)
+{
+  y <- x[, 1:2]
+  if (altlinks) y <- rbind(y, attr(x, "alter.links")[, 1:2])
+  y <-
+    if (use.labels) matrix(attr(x, "labels")[y], ncol = 2)
+  else y - 1L
+  igraph::graph_from_edgelist(y, directed = directed, ...)
+}
+
+
+ig <- as.igraph.haploNet(hnp, directed = FALSE, altlinks = FALSE)
+
+nm <- igraph::vertex.attributes(ig)$name
+
+igraph::V(ig)$size <- (sizes[nm] + 10)*4
+igraph::V(ig)$size2 <- (sizes[nm] + 10)*4
+igraph::E(ig)
+
+set.seed(123456)
+lay <- igraph::layout_nicely(ig)
+
+par(new = TRUE)
+plot(ig,
+     xlim = range(lay[, 1]),
+     ylim = range(lay[, 2]),
+     layout = lay,
+     vertex.color = cols[nm],
+     vertex.frame.color = cols[nm],
+     rescale = FALSE,
+     # asp = 0,
+     vertex.label.color = "black",
+     vertex.label.dist = 0,
+     vertex.label.degree = -pi/4)
+
+plot(ig,
+     xlim = range(lay[, 1]),
+     ylim = range(lay[, 2]),
+     layout = lay,
+     vertex.size = 0,
+     rescale = FALSE,
+     # asp = 0,
+     vertex.label.color = "black",
+     vertex.label.dist = 0,
+     vertex.label.degree = -pi/4, add = TRUE)
+
+
+cols <- lapply(haplo.index.list, \(x) dimnames(seqs)[[1]][x]) |>
+  lapply(\(x) c(sum(x %in% meta$Sample[meta$Domestic]),
+                sum(!x %in% meta$Sample[meta$Domestic])))
+
+cols
+cols <- cols[attr(hnp, "labels")]
+
+
+set.seed(1234)
+lay <- igraph::layout_with_fr(ig)
+
+
+plot(ig,
+     xlim = range(lay[, 1]),
+     ylim = range(lay[, 2]),
+     layout = lay,
+     vertex.shape = "pie",
+     vertex.pie = cols[nm],
+     vertex.pie.color = lapply(cols, \(x) c("salmon2", "lightblue")[x > 0]),
+     rescale = FALSE,
+     # asp = 0,
+     vertex.label.color = "black",
+     vertex.label.dist = 12,
+     vertex.label.degree = -pi/4)
+
+plot(ig,
+     xlim = range(lay[, 1]),
+     ylim = range(lay[, 2]),
+     layout = lay,
+     vertex.size = 0,
+     rescale = FALSE,
+     # asp = 0,
+     vertex.label = NA,
+     vertex.label.color = "black",
+     vertex.label.dist = 0,
+     vertex.label.degree = -pi/4, add = TRUE)
+
+
