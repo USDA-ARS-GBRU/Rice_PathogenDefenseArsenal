@@ -25,8 +25,8 @@ quantile(regions$D, 0:20/20)
 #                   min(regions$pi[regions$pi > 0])/10,
 #                   regions$pi))) |>
 #   plot(xlim = c(-8, 0), verticals = TRUE)
-# 
-# 
+#
+#
 # ecdf(log10(ifelse(regions$pi == 0,
 #                   min(regions$pi[regions$pi > 0])/10,
 #                   regions$pi))) |>
@@ -44,24 +44,29 @@ g1 <- ggplot2::ggplot(data = subset(regions, D < 5 & STOP - START + 1L > 50L),
   ggplot2::geom_point(alpha = 0.5, size = 2, color = "black", shape = 21) +
   ggplot2::geom_smooth(ggplot2::aes(color = type,
                                     linetype = type)) +
-  ggplot2::facet_grid(~CHR, space = "free_x", scales = "free_x") +
+  ggplot2::facet_grid(~CHR, space = "free_x", scales = "free_x",
+                      labeller = ggplot2::labeller(CHR = function(x) {
+                        x <- as.character(x);
+                        stringr::str_replace_all(x, "\\_", " ") |>
+                          stringr::str_replace_all("Chromosome", "Chr.");
+                      })) +
   ggplot2::theme_minimal() +
   ggplot2::xlab("Position on Chromosome (Mb)") +
   ggplot2::theme(text = ggplot2::element_text(size = 14, family = "Arial", color = "black"),
-                 legend.position = "inside",
+                 # legend.position = "inside",
                  legend.background = ggplot2::element_rect(fill = ggplot2::alpha("white", 0.5),
                                                            color = "black"),
-                 legend.position.inside = c(0.94, 0.88),
+                 # legend.position.inside = c(0.94, 0.88),
                  panel.spacing.x = ggplot2::unit(0.5, "lines")) +
-  ggplot2::ylab(latex2exp::TeX("Tajima's $\\textit{D}$ for Each Feature"))
+  ggplot2::ylab(latex2exp::TeX("Tajima's $\\textit{D}$"))
 
-ggplot2::ggsave(g1,
-                filename = "../figures/Tajimas-D_over_time.png",
-                width = 6,
-                height = 2,
-                dpi = 600,
-                scale = 3,
-                units = "in")
+# ggplot2::ggsave(g1,
+#                 filename = "../figures/Tajimas-D_over_time.png",
+#                 width = 6,
+#                 height = 2,
+#                 dpi = 600,
+#                 scale = 3,
+#                 units = "in")
 
 g2 <- ggplot2::ggplot(data = subset(regions, D < 5 & STOP - START + 1L > 50L),
                 ggplot2::aes(x = START/1e6,
@@ -75,7 +80,7 @@ g2 <- ggplot2::ggplot(data = subset(regions, D < 5 & STOP - START + 1L > 50L),
   ggplot2::geom_abline(intercept = mean(regions$D),
                        slope = 0,
                        col = "red", linetype = "dashed") +
-  ggplot2::scale_y_continuous(name = latex2exp::TeX("$\\hat{\\pi}$ (Nucleotide Diversity) for Each Feature"),
+  ggplot2::scale_y_continuous(name = latex2exp::TeX("$\\hat{\\pi}$ (Nucleotide Diversity)"),
                               trans = scales::pseudo_log_trans(base = 10,
                                                              sigma = 0.0001),
                               limits = c(0, 0.15),
@@ -85,20 +90,27 @@ g2 <- ggplot2::ggplot(data = subset(regions, D < 5 & STOP - START + 1L > 50L),
                               labels = scales::label_number(drop0trailing=TRUE)) +
   ggplot2::xlab("Position on Chromosome (Mb)") +
   ggplot2::theme(text = ggplot2::element_text(size = 14, family = "Arial", color = "black"),
-                 legend.position = "inside",
+                 # legend.position = "inside",
                  legend.background = ggplot2::element_rect(fill = ggplot2::alpha("white", 0.3),
                                                            color = "black"),
-                 legend.position.inside = c(0.94, 0.88),
-                 panel.spacing.x = ggplot2::unit(0.5, "lines"))
+                 # legend.position.inside = c(0.94, 0.88),
+                 panel.spacing.x = ggplot2::unit(0.5, "lines"),
+                 strip.text = ggplot2::element_blank())
 
-ggplot2::ggsave(g2,
-                filename = "../figures/pi_over_time.png",
-                width = 6,
-                height = 2,
-                dpi = 600,
-                scale = 3,
-                units = "in")
+# ggplot2::ggsave(g2,
+#                 filename = "../figures/pi_over_time.png",
+#                 width = 6,
+#                 height = 2,
+#                 dpi = 600,
+#                 scale = 3,
+#                 units = "in")
 
+f5.AB <- ggpubr::ggarrange(g1 + ggpubr::rremove("xlab") + ggpubr::rremove("x.ticks") + ggpubr::rremove("x.text"), g2,
+                           common.legend = TRUE, legend = "none",ncol = 1,
+                           heights = c(1, 1),
+                           align = "v",
+                           labels = c("A", "B"),
+                           font.label = list(size = 16, color = "black", face = "bold", family = "Arial"))
 
 g3 <- ggplot2::ggplot(data = subset(regions, D < 5 & STOP - START + 1L > 50L),
                 ggplot2::aes(x =  pi,
@@ -116,17 +128,31 @@ g3 <- ggplot2::ggplot(data = subset(regions, D < 5 & STOP - START + 1L > 50L),
                               name = latex2exp::TeX("$\\hat{\\pi}$ (Nucleotide Diversity)")) +
   ggplot2::theme_minimal() +
   ggplot2::theme(text = ggplot2::element_text(size = 14, family = "Arial", color = "black"),
-                 legend.position = "inside",
+                 legend.position = "none", # "inside",
                  legend.background = ggplot2::element_rect(fill = ggplot2::alpha("white", 0.3),
                                                            color = "black"),
-                 legend.position.inside = c(0.80, 0.2),
-                 panel.spacing.x = ggplot2::unit(1, "lines")) +
-  ggplot2::ylab(latex2exp::TeX("\\overset{Cumulative Number of Features with}{$\\hat{\\pi}$ (Nucleotide Diversity) Less Than $\\textit{x}$}"))
+                 # legend.position.inside =  c(0.80, 0.2),
+                 axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                 panel.spacing.x = ggplot2::unit(1, "lines"),
+                 legend.title = ggplot2::element_blank()) +
+  ggplot2::scale_y_continuous(name = latex2exp::TeX("\\overset{Cumulative Number of Features with}{$\\hat{\\pi}$ (Nucleotide Diversity) Less Than $\\textit{x}$}"),
+                              position = "right")
+# ggplot2::ggsave(g3,
+#                 filename = "../figures/pi_ecdf.png",
+#                 width = 5,
+#                 height = 3,
+#                 dpi = 600,
+#                 scale = 2.2,
+#                 units = "in")
 
-ggplot2::ggsave(g3,
-                filename = "../figures/pi_ecdf.png",
-                width = 5,
-                height = 3,
-                dpi = 600,
-                scale = 2.2,
-                units = "in")  
+f5.ABC <- ggpubr::ggarrange(f5.AB, g3,
+                           common.legend = TRUE, legend = "top",
+                           legend.grob = ggpubr::get_legend(g3),
+                           ncol = 2,
+                           widths = c(1.66, 1),
+                           labels = c("", "C"),
+                           font.label = list(size = 16, color = "black", face = "bold", family = "Arial"))
+
+ggplot2::ggsave(plot = f5.ABC, filename = "../figures/Figure_5.png",
+                dpi = 600, width = 7.5, height = 3, scale = 3)
+
