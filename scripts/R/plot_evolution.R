@@ -132,7 +132,7 @@ plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pit
                             trailingGapsAsN = FALSE,
                             strict = FALSE)
 
-  # rename haplotype sequences from roman numberals to VXXX
+  # rename haplotype sequences from roman numerals to VXXX
   attr(haplo, "dimnames")[[1]] <- paste0("V",
                                          stringr::str_pad(seq_along(attr(haplo, "dimnames")[[1]]),
                                                           width = 3, pad = "0"))
@@ -209,6 +209,9 @@ plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pit
   # rescale layout to have equal height and width
   lay <- scale(lay)*15
 
+  # salmon2 is US
+  # lightblue is World
+
   png(img, width = 7, height = 7, units = "in", res = 600, pointsize = 7)
   par(bg = NA)
   par(mar = c(0, 0, 0, 0))
@@ -222,7 +225,7 @@ plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pit
        # vertex.pie.density = 1,
        rescale = FALSE,
        # asp = 0,
-       vertex.label = NA)
+       vertex.label = NA, family = "Arial")
 
   plot(ig,
        xlim = range(lay[, 1]),
@@ -234,7 +237,20 @@ plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pit
        vertex.label.color = "black",
        vertex.label.dist = 12,
        vertex.label.degree = -pi/2,
-       add = TRUE)
+       add = TRUE, family = "Arial")
+
+  gene <- fs::path_ext_remove(basename(img)) |>
+    stringr::str_replace_all("haplotype\\_network\\_",
+                             "")
+
+  if (gene == "Piks") {
+    legend("bottomright",
+           legend = c("U.S.", "World"),
+           col = c("salmon2", "lightblue"),
+           pch = 19, inset = c(0.05, 0.05))
+  }
+
+  title(main = gene, line = -1, family = "Arial", font = 1)
   dev.off()
   }
 
@@ -243,3 +259,12 @@ plot_msa_network(fa = here::here("sequences", "AVR_Alignments", "Pita1", "cds.al
 
 plot_msa_network(fa = here::here("sequences", "AVR_Alignments", "Piks", "cds.aln.fasta"),
                  img = here::here("figures", "haplotype_network_Piks.png"))
+
+# https://stackoverflow.com/questions/25360248/arrange-multiple-32-png-files-in-a-grid
+plot1 <- png::readPNG(here::here("figures", "haplotype_network_Pita1.png"))
+plot2 <- png::readPNG(here::here("figures", "haplotype_network_Piks.png"))
+
+tmp <- gridExtra::arrangeGrob(grid::rasterGrob(plot1), grid::rasterGrob(plot2), nrow = 1)
+
+ggplot2::ggsave(here::here("figures", "Figure_4.png"), tmp, width = 14, height = 7)
+

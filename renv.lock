@@ -2348,7 +2348,7 @@
       "RemoteRepo": "Rice_PathogenDefenseArsenal",
       "RemoteSubdir": "scripts/R/genomicpp",
       "RemoteRef": "main",
-      "RemoteSha": "c6cb1f920e38bf5cf8b153a28562671eda137a19"
+      "RemoteSha": "157628d4e55e65185fc72cce128c621e068392ba"
     },
     "gert": {
       "Package": "gert",

@@ -43,8 +43,8 @@ g <- ggplot2::ggplot(AVR,
                      color = "red") +
   ggplot2::geom_ribbon(data = AVR.split,
                        ggplot2::aes(x = Year_Collected,
-                                    ymin = pred - SE,
-                                    ymax = pred + SE),
+                                    ymin = pmax(pred - SE, 0),
+                                    ymax = pmin(pred + SE, 1)),
                        alpha = 0.2,
                        inherit.aes = FALSE,
                        color = "black") +
@@ -56,14 +56,15 @@ g <- ggplot2::ggplot(AVR,
                  # legend.position.inside = c(0.95, 0.85),
                  panel.spacing.x = ggplot2::unit(1, "lines")) +
   ggplot2::scale_y_continuous(name = "Predicted Prevalence of AVR Gene",
-                              limits = c(-0.1, 1.1), 
+                              limits = c(-0.1, 1.1),
                               breaks = seq(0, 1, 0.25)) +
   ggplot2::xlab("Year Sample Collected") +
-  ggplot2::scale_fill_manual(name = "AVR Status", 
+  ggplot2::scale_fill_manual(name = "AVR Status",
                              # values = viridisLite::plasma(2),
                              values = c("purple", "lightgrey"),
                              labels = c("Absent", "Present")) +
   ggplot2::ggtitle("AVR Presence/Absence in Pathogen Samples, over Time")
+
 g
 ggplot2::ggsave(g,
                 filename = "../figures/AVR_over_time.png",
@@ -72,4 +73,11 @@ ggplot2::ggsave(g,
                 dpi = 600,
                 scale = 2,
                 units = "in")
+
+AVR.USA <- AVR
+AVR.split.USA <- AVR.split
+
+save(AVR.USA,
+     AVR.split.USA,
+     file = "../outputs/source_data_AVR_PA_over_time_USA.RData")
 

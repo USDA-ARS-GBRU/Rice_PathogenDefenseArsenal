@@ -113,9 +113,9 @@ if (length(pal) == 1) {
 }
 
 post$Decade <- paste0(floor(pathogen.SSR.meta$Year[match(post$sample, pathogen.SSR.meta$`Isolate name`)] / 10) * 10,
-                      "'s")
+                      "s")
 post$Decade <- factor(post$Decade,
-                      levels = c("1970's", "1980's", "1990's", "2000's", "2010's"))
+                      levels = c("1970s", "1980s", "1990s", "2000s", "2010s"))
 # post$Decade <- factor(substr(post$Decade, 3,4),
 #                       levels = c("70", "80", "90", "00", "10"))
 
@@ -187,7 +187,24 @@ post2 <- post |>
                              levels = colnames(pathogen.AVR)[xord2]))
 
 
-g2 <- ggplot2::ggplot(post2,
+g2 <- ggplot2::ggplot(post2 |>
+                        dplyr::mutate(AVR = AVR |>
+                                        stringr::str_replace_all("Pi_",
+                                                                      "Pi") |>
+                                        stringr::str_replace_all("_", "-") |>
+                                        stringr::str_replace_all("Pita-Pita2-Ptr",
+                                                                 "Pi-ta Pi-ta2 Ptr") |>
+                                        stringr::str_replace_all("AVR-ii",
+                                                                 "AVR-Pii")) |>
+                        dplyr::mutate(AVR = factor(AVR,
+                                                   levels = c("AVR-Piks",
+                                                              "AVR-Pib",
+                                                              "AVR-Pi9",
+                                                              "AVR-Pizt",
+                                                              "AVR-Pita1",
+                                                              "AVR-Pii",
+                                                              "AVR-Pia",
+                                                              "ACE1"))),
                          ggplot2::aes(x = sample,
                                       fill = P,
                                       y = AVR)) +
@@ -207,6 +224,7 @@ g2 <- ggplot2::ggplot(post2,
                  axis.text.x.bottom = ggplot2::element_blank(),
                  strip.background = ggplot2::element_blank(),
                  strip.text = ggplot2::element_blank(),
+                 axis.text.y = ggplot2::element_text(face = "italic"),
                  # axis.title.y = ggplot2::element_blank(),
                  panel.background = ggplot2::element_blank()) +
   ggplot2::scale_x_discrete(expand = c(0, 0)) +
@@ -224,11 +242,11 @@ gp <- ggpubr::ggarrange(g1, g2, ncol = 1,
                   align = "v")
 
 ggplot2::ggsave(gp,
-       filename = here::here("figures", "AVR_and_structure.png"),
-       width = 4,
-       height = 2,
+       filename = here::here("figures", "Figure_1.png"),
+       width = 7.5,
+       height = 3,
        dpi = 600,
-       scale = 3,
+       scale = 2,
        units = "in")
 
 # save membership probabilities

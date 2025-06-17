@@ -5,8 +5,8 @@ build_timeseries_lag <- NULL
 #' Build a time-series lag matrix for testing parameter combinations.
 #'
 
-#' @param N 
-#' @param UPTO 
+#' @param N
+#' @param UPTO
 #'
 #' @returns a list containing a `matrix` object of type NA_real_ with the lags
 #' @export
@@ -14,20 +14,20 @@ build_timeseries_lag <- NULL
 #' @examples
 build_timeseries_lag <- function(N, UPTO) {
   mat <- matrix(NA_real_, nrow = N + 1, ncol = N + 1)
-  
+
   parms <- which(lower.tri(mat,  diag = TRUE), arr.ind = TRUE) |>
     as.data.frame() |>
     dplyr::arrange(dplyr::desc(row), dplyr::desc(col)) |>
     setNames(c("N", "UPTO")) |>
     dplyr::mutate(N = N - 1L, UPTO = UPTO - 1L) |>
-    dplyr::mutate("Trial" = paste0("Trial_", 
+    dplyr::mutate("Trial" = paste0("Trial_",
                                    "N-", stringr::str_pad(N, 2, pad = "0"),
-                                   "_", 
+                                   "_",
                                    "UPTO-",stringr::str_pad(UPTO, 2, pad = "0")))
-  
+
   rownames(mat) <- paste0("N-", stringr::str_pad(0:N, 2, pad = "0"))
   colnames(mat) <- paste0("UPTO-", stringr::str_pad(0:N, 2, pad = "0"))
-  
+
   return(list(mat = mat, parms = parms))
 }
 
@@ -36,18 +36,19 @@ Pred <- NULL
 proportion <- NULL
 Year <- NULL
 State <- NULL
+SE <- NULL
 
 setup_data <- function(N, UPTO) {
   rice  <- readRDS(file = "rice_smooth.RDS") |>
     tidyr::pivot_wider(names_from = R, values_from = Pred)
-  pathogens <- readRDS(file = "pathogen.RDS") 
-  
+  pathogens <- readRDS(file = "pathogen.RDS")
+
   resistant <- split(rice[, -c(1)], rice$State) |>
     lapply(\(x) {
       x2 <- data.matrix(x[, -c(1)]);
       rownames(x2) <- x$Year;
       return(t(x2));})
-  
+
   # use resistant "as-is" if we are not taking a rolling average
   if (N == 0 & UPTO == 0) {
   } else {
@@ -59,7 +60,7 @@ setup_data <- function(N, UPTO) {
                           return(x2);
                         })
   }
-  
+
   # pivot from years in columns to R genes in columns
   resistant <- resistant |>
     lapply(data.frame, check.names = FALSE) |>
@@ -68,19 +69,19 @@ setup_data <- function(N, UPTO) {
     tidyr::pivot_longer(-c(1:2), names_to = "Year", values_to = "proportion") |>
     tidyr::pivot_wider(names_from = R, values_from = proportion) |>
     dplyr::mutate(Year = as.double(Year))
-  
+
   # join the host and pathogen data
   data <- dplyr::left_join(pathogens, resistant, by = c("State", "Year"),
                            relationship = "many-to-one")
-  
+
   # fix the R gene names to work with glmmTMB
-  colnames(data) <- stringr::str_replace_all(colnames(data), 
-                                             pattern = " ", 
+  colnames(data) <- stringr::str_replace_all(colnames(data),
+                                             pattern = " ",
                                              replacement = "_")
   colnames(data) <- stringr::str_replace_all(colnames(data),
                                              pattern = "-",
                                              replacement = "_")
-  
+
   # turn into binomial data
   pathogens_short <- data |>
     dplyr::mutate(dplyr::across(5:12, \(x) as.integer(x))) |>
@@ -91,7 +92,7 @@ setup_data <- function(N, UPTO) {
                      dplyr::across(dplyr::starts_with(c("Pi")), mean),
                      .groups = "drop") |>
     dplyr::mutate(State = factor(State))
-  
+
   return(pathogens_short)
 }
 
@@ -119,17 +120,17 @@ for (cognate in names(cognates)) {
     N = parms$N[rown]
     UPTO = parms$UPTO[rown]
     Trial = parms$Trial[rown]
-    
+
     data <- setup_data(N, UPTO)
-    
+
     n_rgenes <- length(cognates[[cognate]])
-    
+
     form <- paste0("cbind(", cognate, ", nTrials - ", cognate, ") ~ 1 + ",
                    "(1 | State) + ",
                    paste0(cognates[[cognate]], collapse = " + ")) |>
       as.formula()
-    
-    
+
+
     g <- glmmTMB::glmmTMB(form,
                           data = data,
                           priors = data.frame(prior = c("normal(0, 5)"),
@@ -142,7 +143,7 @@ for (cognate in names(cognates)) {
     g.summary <- summary(g)
 
     range_ <- 2:(n_rgenes + 1)
-    
+
     outlist[[rown]] <- list("coeff" = g.summary$coefficients$cond[range_, 1] |> unname(),
                             "SE" =  g.summary$coefficients$cond[range_, 2] |> unname(),
                             "pval" =  g.summary$coefficients$cond[range_, 4] |> unname(),
@@ -182,8 +183,8 @@ saveRDS(outlists.best, "../outputs/AVR-by-R_mods.RDS")
 outlists.df.byRgene <- outlists.df |>
   lapply(\(x) dplyr::arrange(x, Trial)) |>
   lapply(\(x) split(x[, c("coeff", "SE", "pval")], x$R)) |>
-  lapply(\(AVR) lapply(AVR, 
-                       \(Rgene) lapply(Rgene, 
+  lapply(\(AVR) lapply(AVR,
+                       \(Rgene) lapply(Rgene,
                                        \(x) {
                                          tmat <- mat |> t();
                                          tmat[upper.tri(tmat, diag = TRUE)] <- x;
@@ -206,7 +207,7 @@ for (AVR in names(cognates)) {
                        # filename = "heatmap_pval.png",
                        # width = 10, height = 10
     )
-    
+
     pheatmap::pheatmap(outlists.df.byRgene[[AVR]][[Rgene]][["pval"]] |> log10(),
                        cellwidth = 30,
                        cellheight = 30,
@@ -236,29 +237,34 @@ newdata.list <- lapply(names(cognates),
   lapply(expand.grid)
 
 newdata.preds <- purrr::map2(outlists.best, newdata.list,
-            \(x, df) predict(x$mod, newdata = df, re.form = ~ 0)) |>
-  lapply(plogis) |>
+                             \(x, df) predict(x$mod, newdata = df,
+                                              re.form = ~ 0,
+                                              se.fit = TRUE,
+                                              type = "response")) |>
+  lapply(\(x) data.frame(pred = x$fit |> unname(),
+                         SE = x$se.fit |> unname())) |>
   purrr::map2(newdata.list, \(x,y) cbind(y,x)) |>
   purrr::map2(names(cognates), \(x,y) {
-    colnames(x)[ncol(x)] <- y;
+    colnames(x)[ncol(x) - 1] <- paste0(y);
+    colnames(x)[ncol(x)] <- paste0("SE");
     return(x);
   })
 
 newdata.pred <- lapply(newdata.preds,
-                       \(x) tidyr::pivot_longer(x, 2:(ncol(x) - 1),
+                       \(x) tidyr::pivot_longer(x, 2:(ncol(x) - 2),
                                                 names_to = "R",
                                                 values_to = "proportion") |>
                          tidyr::pivot_longer(2, names_to = "AVR", values_to = "prevalence")) |>
-  purrr::list_rbind()
+  purrr::list_rbind() |>
+  dplyr::relocate(SE, .after = dplyr::last_col())
 
 
 # get the metadata on the lags
 meta.lag <- lapply(outlists.df, \(x) x$Trial[which.min(x$pval)])
 meta.lag <- meta.lag[which(!names(meta.lag) %in% c("AVR_Piks", "AVR_Pib"))]
-meta.lag <- lapply(meta.lag, 
+meta.lag <- lapply(meta.lag,
                    \(x) paste0(substr(x, 9, 10), " to ",
                                substr(x, 17, 18), " years prior"))
-
 
 g <- ggplot2::ggplot(newdata.pred |>
                   dplyr::filter(AVR != "AVR_Piks",
@@ -266,7 +272,7 @@ g <- ggplot2::ggplot(newdata.pred |>
                   dplyr::arrange(AVR, R, proportion),
                 ggplot2::aes(x = proportion,
                              y = prevalence)) +
-  ggplot2::geom_line() +
+  ggplot2::geom_line(color = "red") +
   ggplot2::facet_wrap(~AVR,
                       labeller = ggplot2::labeller(AVR = function(x) {
                         x <- as.character(x);
@@ -280,7 +286,13 @@ g <- ggplot2::ggplot(newdata.pred |>
                  panel.spacing.x = ggplot2::unit(2, "lines")) +
   ggplot2::scale_y_continuous(name = "Predicted Proportion of Isolates with Cognate AVR Gene",
                               limits = c(0, 1)) +
-  ggplot2::scale_x_continuous(name = "Proportion of Rice Acres with R Gene")
+  ggplot2::scale_x_continuous(name = "Proportion of Rice Acres with R Gene") +
+  ggplot2::geom_ribbon(ggplot2::aes(x = proportion,
+                                    ymin = pmax(prevalence - SE, 0),
+                                    ymax = pmin(prevalence + SE, 1)),
+                       alpha = 0.2,
+                       inherit.aes = FALSE,
+                       color = "black")
 
 ggplot2::ggsave(g, filename = "../figures/Rgenes-AVR_over_time.png",
                 width = 6,
@@ -295,7 +307,7 @@ newdata.pred.piks <- newdata.preds$AVR_Piks |>
 
 meta.lag2 <- lapply(outlists.df, \(x) x$Trial[which.min(x$pval)])
 meta.lag2 <- meta.lag2[which(names(meta.lag2) %in% c("AVR_Piks"))]
-meta.lag2 <- lapply(meta.lag2, 
+meta.lag2 <- lapply(meta.lag2,
                    \(x) paste0(substr(x, 9, 10), " to ",
                                substr(x, 17, 18), " years prior")) |>
   unlist() |>
@@ -316,7 +328,13 @@ g <- ggplot2::ggplot(newdata.pred.piks,
                  panel.spacing.x = ggplot2::unit(2, "lines")) +
   ggplot2::scale_y_continuous(name = "Predicted Proportion of Isolates with Cognate AVR Gene",
                               limits = c(0, 1)) +
-  ggplot2::scale_x_continuous(name = "Proportion of Rice Acres with R Gene")
+  ggplot2::scale_x_continuous(name = "Proportion of Rice Acres with R Gene") +
+  ggplot2::geom_ribbon(ggplot2::aes(x = Pi_km,
+                                    ymin = pmax(AVR_Piks - SE, 0),
+                                    ymax = pmin(AVR_Piks + SE, 1)),
+                       alpha = 0.2,
+                       inherit.aes = FALSE,
+                       color = "black")
 
 ggplot2::ggsave(g, filename = "../figures/Rgenes-AVR-Piks_over_time.png",
                 width = 6,
@@ -324,3 +342,19 @@ ggplot2::ggsave(g, filename = "../figures/Rgenes-AVR-Piks_over_time.png",
                 dpi = 600,
                 scale = 2,
                 units = "in")
+
+Rgenes_AVR_over_time <- newdata.pred |>
+  dplyr::filter(AVR != "AVR_Piks",
+                AVR != "AVR_Pib") |>
+  dplyr::arrange(AVR, R, proportion)
+Rgenes_AVR_over_time.lag <- meta.lag
+
+Rgenes_AVR_over_time2 <- newdata.pred.piks
+Rgenes_AVR_over_time.lag2             <- meta.lag2
+
+# save everything you need for this figure
+save(Rgenes_AVR_over_time,
+     Rgenes_AVR_over_time.lag,
+     Rgenes_AVR_over_time2,
+     Rgenes_AVR_over_time.lag2,
+     file = "../outputs/source_data_Rgenes_AVR_over_time.RData")
