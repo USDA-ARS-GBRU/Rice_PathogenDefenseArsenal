@@ -231,17 +231,23 @@ f2.D <- ggplot2::ggplot(Rgenes_AVR_over_time |>
 f2.AB <- ggpubr::ggarrange(f2.A, f2.B + ggpubr::rremove("ylab") + ggpubr::rremove("y.ticks") + ggpubr::rremove("y.text"),
                            common.legend = TRUE, legend = "none",
                            widths = c(1.1, 1),
-                           align = "h")
+                           align = "h",
+                           labels = c("A", "B"),
+                           font.label = list(size = 16, color = "black", face = "bold", family = "Arial"))
 
 
 f2.ABC <- ggpubr::ggarrange(f2.AB, f2.C + ggpubr::rremove("y.ticks") + ggpubr::rremove("y.text"),
                             common.legend = FALSE,
-                            align = "h", widths = c(2, 1))
+                            align = "h", widths = c(2, 1),
+                            labels = c("", "C"),
+                            font.label = list(size = 16, color = "black", face = "bold", family = "Arial"))
 
 f2.ABCD <- ggpubr::ggarrange(f2.ABC, f2.D, #+ ggpubr::rremove("y.ticks") + ggpubr::rremove("y.text"),
                              common.legend = FALSE,
                              align = "h",
-                             widths = c(3, 1))
+                             widths = c(3, 1),
+                             labels = c("", "D"),
+                             font.label = list(size = 16, color = "black", face = "bold", family = "Arial"))
 
 f2.ABCD
 

@@ -79,7 +79,7 @@ f3.A <- ggplot2::ggplot(AVR.Global |>
                  strip.text = ggplot2::element_text(face = "italic"),
                  plot.title = ggplot2::element_text(hjust = 0.5),
                  axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 12, b = 0, l = 0))) +
-  ggplot2::scale_y_continuous(name = "Predicted Prevalence of AVR Gene",
+  ggplot2::scale_y_continuous(name = "Predicted Prevalence\nof AVR Gene",
                               limits = c(-0.1, 1.1),
                               breaks = seq(0, 1, 0.25)) +
   ggplot2::scale_x_continuous(name = "Year World Isolate\nSample Collected",
@@ -125,7 +125,7 @@ f3.B <- ggplot2::ggplot(AVR.USA |>
                  panel.spacing.x = ggplot2::unit(1, "lines"),
                  strip.text = ggplot2::element_text(face = "italic"),
                  plot.title = ggplot2::element_text(hjust = 0.5)) +
-  ggplot2::scale_y_continuous(name = "Predicted Prevalence of AVR Gene",
+  ggplot2::scale_y_continuous(name = "Predicted Prevalence\nof AVR Gene",
                               limits = c(-0.1, 1.1),
                               breaks = seq(0, 1, 0.25)) +
   ggplot2::xlab("Year U.S. Isolate\nSample Collected") +
@@ -156,7 +156,7 @@ f3.C <- ggplot2::ggplot(data = Rgenes |>
                                   y = pred,
                                   group = State,
                                   color = State)) +
-  ggplot2::scale_y_continuous(name = "Proportion of Rice Acres with R Gene",
+  ggplot2::scale_y_continuous(name = "Proportion of Rice Acres\nwith R Gene",
                               limits = c(-0.1, 1.1),
                               breaks = seq(0, 1, 0.25),
                               position = "left") +
@@ -215,20 +215,26 @@ f3.AB <- ggpubr::ggarrange(f3.A, f3.B + ggpubr::rremove("ylab") + ggpubr::rremov
                            ncol = 2,
                            common.legend = TRUE, legend = "none",
                            widths = c(1.1, 1),
-                           align = "h")
+                           align = "h",
+                           labels = c("A", "B"),
+                           font.label = list(size = 16, color = "black", face = "bold", family = "Arial"))
 
 f3.AB
 
 f3.ABC <- ggpubr::ggarrange(f3.AB, f3.C,
                             common.legend = FALSE,
-                            nrow = 2)
+                            nrow = 2,
+                            labels = c("", "C"),
+                            font.label = list(size = 16, color = "black", face = "bold", family = "Arial"))
 
 f3.ABC
 
 f3.ABCD <- ggpubr::ggarrange(f3.ABC, f3.D, #+ ggpubr::rremove("y.ticks") + ggpubr::rremove("y.text"),
                              common.legend = FALSE,
                              align = "h",
-                             widths = c(2, 3))
+                             widths = c(2, 3),
+                             labels = c("", "D"),
+                             font.label = list(size = 16, color = "black", face = "bold", family = "Arial"))
 
 f3.ABCD
 
