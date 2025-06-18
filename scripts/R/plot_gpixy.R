@@ -154,5 +154,5 @@ f5.ABC <- ggpubr::ggarrange(f5.AB, g3,
                            font.label = list(size = 16, color = "black", face = "bold", family = "Arial"))
 
 ggplot2::ggsave(plot = f5.ABC, filename = "../figures/Figure_5.png",
-                dpi = 600, width = 7.5, height = 3, scale = 3)
+                dpi = 600, width = 7.5, height = 2.5, scale = 3)
 

@@ -1,7 +1,8 @@
 here::i_am("scripts/R/structure.R")
 
 library(extrafont)
-extrafont::font_import(prompt = FALSE)
+# extrafont::font_import(prompt = FALSE)
+extrafont::loadfonts(device="postscript")
 
 
 ID <- NULL
@@ -11,6 +12,7 @@ AVR <- NULL
 probability <- NULL
 oldPopulation <- NULL
 s1 <- s2 <- s3 <- s4 <- s5 <- NULL
+Population <- NULL
 
 pathogen <- readRDS(here::here("inputs", "pathogen.RDS"))
 
@@ -23,14 +25,6 @@ pathogen.SSR[is.na(pathogen.SSR)] <- -9
 pathogen.AVR <- data.matrix(pathogen[, c(5:12)])
 rownames(pathogen.AVR) <- pathogen$`Isolate name`
 pathogen.AVR <- pathogen.AVR[rownames(pathogen.SSR), ]
-
-
-# pathogen.SSR <- pathogen.SSR |> as.data.frame() |>
-#   tibble::rownames_to_column("ID") |>
-#   dplyr::mutate(ID = stringr::str_replace_all(ID, "/", "")) |>
-#   dplyr::mutate(ID = stringr::str_replace_all(ID, " ", ""))
-#
-# colnames(pathogen.SSR)[1] <- ""
 
 write.table(pathogen.SSR,
             file = here::here("inputs", "structure.str"), sep = "\t",
@@ -233,14 +227,17 @@ g2 <- ggplot2::ggplot(post2 |>
                       scales = "free_x") +
   ggplot2::scale_fill_manual(name = "AVR Status",
                              values = c("black", "lightgrey")) +
-  ggplot2::ylab("AVR Gene")
+  ggplot2::ylab("Gene")
 
 g2
 
 gp <- ggpubr::ggarrange(g1, g2, ncol = 1,
                   heights = c(2,1),
-                  align = "v")
+                  align = "v",
+                  labels = c("A", "B"),
+                  font.label = list(size = 16, color = "black", face = "bold", family = "Arial"))
 
+gp
 ggplot2::ggsave(gp,
        filename = here::here("figures", "Figure_1.png"),
        width = 7.5,
@@ -249,12 +246,84 @@ ggplot2::ggsave(gp,
        scale = 2,
        units = "in")
 
-# save membership probabilities
-post |>
+post.save <- post |>
   tidyr::pivot_wider(names_from = "population", values_from = "probability", names_prefix = "s") |>
   dplyr::select(sample, Decade, oldPopulation, grp2, s1, s2, s3, s4, s5) |>
   setNames(c("Sample", "Decade", "State", "Most Likely Population",
              "Subpop 1", "Subpop 2", "Subpop 3", "Subpop 4", "Subpop 5")) |>
-  dplyr::mutate(dplyr::across(dplyr::starts_with("Subpop"), \(x) round(x, 4))) |>
+  dplyr::mutate(dplyr::across(dplyr::starts_with("Subpop"), \(x) round(x, 4)))
+
+# merge on the P/A of the genes
+post.save.joined <- post.save[, 1:4] |>
+  dplyr::rename(Population = 4) |>
+  dplyr::mutate(Population = factor(Population)) |>
+  dplyr::left_join(post2[, c(1, 2, 4, 5)] |>
+                     dplyr::mutate(P = factor(ifelse(P == "Present", 1L, 0L),
+                                              levels = c(0L, 1L))) |>
+                     tidyr::pivot_wider(names_from = "AVR",
+                                        values_from = "P"),
+                   by = c("Sample" = "sample",
+                          "Decade" = "Decade")) |>
+  dplyr::relocate(Population, .before = 2) |>
+  dplyr::left_join(pathogen.SSR |>
+                     as.data.frame() |>
+                     tibble::rownames_to_column("Sample") |>
+                     dplyr::mutate(dplyr::across(dplyr::where(is.numeric), \(x) factor(dplyr::na_if(x, -9L)))),
+                   by = "Sample") |>
+  dplyr::select(-1)
+
+#
+# vars <- Filter(\(x) length(unique(x)) > 1L, post.save.joined)
+#
+# # drop AVR-Pib because the `0` class is way too small
+# vars <- subset(vars, select = -`AVR-Pib`)
+#
+# # rearrange to alphabetize
+# vars <- vars[, c(1, 2, 3, 6, 7, 5, 4, 8, 10, 13, 14, 16, 18, 9, 11, 12, 15, 17)]
+#
+# vars.mat <- matrix(data = NA_real_, nrow = ncol(vars), ncol = ncol(vars),
+#                    dimnames = list(colnames(vars), colnames(vars)))
+#
+# pvals.mat <- matrix(data = NA_real_, nrow = ncol(vars), ncol = ncol(vars),
+#                    dimnames = list(colnames(vars), colnames(vars)))
+#
+# vars.mat[lower.tri(vars.mat)] <- combn(vars,
+#                                        2,
+#                                        \(x) chisq.test(x = x[[1]],
+#                                                        y = x[[2]])$statistic,
+#                                        simplify = TRUE)
+#
+# pvals.mat[lower.tri(pvals.mat)] <- combn(vars,
+#                                          2,
+#                                          \(x) chisq.test(x = x[[1]],
+#                                                          y = x[[2]]) |>
+#                                            confintr::cramersv(),
+#                                          simplify = TRUE)
+#
+# H0 <- combn(vars,
+#             2,
+#             \(x) vapply(1:2000,
+#                         \(y) tryCatch(chisq.test(x = sample(x = x[[1]]),
+#                                                  y = x[[2]])$statistic,
+#                                       error = \(e) NA_real_),
+#                         numeric(1)))
+#
+# xobs <- vars.mat[lower.tri(vars.mat)]
+#
+# pvals.mat[lower.tri(pvals.mat)] <-  mapply(\(x, y) mean(x < y, na.rm = TRUE),
+#                                            as.data.frame(H0),
+#                                            xobs) |>
+#   unname()
+#
+# pvals.mat[upper.tri(pvals.mat)] <- t(pvals.mat)[upper.tri(pvals.mat)]
+#
+# corrplot::corrplot(pvals.mat, is.corr = FALSE, addshade = "positive",
+#                    type = "upper", diag = FALSE,
+#                    method = "shade",
+#                    col = rev(corrplot::COL1("Purples", n = 100)))
+
+
+# save membership probabilities
+post.save |>
   write.csv(file = here::here("outputs", "subpopulations.csv"),
             row.names = FALSE, quote = FALSE)
