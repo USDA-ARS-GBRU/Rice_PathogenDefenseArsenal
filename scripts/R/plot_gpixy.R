@@ -1,5 +1,4 @@
-setwd("../../inputs/")
-
+here::i_am("scripts/R/plot_gpixy.R")
 library(extrafont)
 
 
@@ -7,7 +6,7 @@ NAME <- NULL
 START <- NULL
 type <- NULL
 
-regions <- read.table("../outputs/interval_popgen.txt.gz",
+regions <- read.table(here::here("outputs", "interval_popgen.txt.gz"),
                       header = TRUE, sep = "\t")
 
 # look at our genes:
@@ -36,6 +35,18 @@ quantile(regions$D, 0:20/20)
 regions <- regions |>
   tidyr::separate(NAME, into = c("type", "extra"), extra = "merge",
                   remove = FALSE)
+#
+# ecdfs.D <- split(regions$D, regions$type)
+#
+# D_obs <- clipr::read_clip() |> as.double()
+# sapply(D_obs, \(x) mean(x < ecdfs.D$exon)) |>
+#   clipr::write_clip()
+#
+# ecdfs.pi <- split(regions$pi, regions$type)
+#
+# pi_obs <- clipr::read_clip() |> as.double()
+# sapply(pi_obs, \(x) mean(x > ecdfs.pi$exon)) |>
+#   clipr::write_clip()
 
 g1 <- ggplot2::ggplot(data = subset(regions, D < 5 & STOP - START + 1L > 50L),
                 ggplot2::aes(x = START/1e6,

@@ -119,7 +119,10 @@ hclust(AA.Pita.dist, method = "complete") |>
 hclust(AA.Piks.dist, method = "complete") |>
   plot()
 
+load(here::here("outputs",
+                "source_data_AVR_PA_over_time_Global.RData"))
 
+library(ape)
 ####
 # read in a coding sequence MSA
 plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pita1", "cds.aln.fasta"),
@@ -130,6 +133,17 @@ plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pit
                              "")
 
   seqs <- adegenet::fasta2DNAbin(fa)
+
+  # drop individuals that failed the "PCR" test
+  bad <- subset(AVR.Global,
+                AVR == paste0("AVR-", gene) &
+                  Detected == 0,
+                select = ID,
+                drop = TRUE)
+
+  seqs <- seqs[!dimnames(seqs)[[1]] %in% bad, ]
+
+  # subset seqs to drop individuals that didn't actually have the gene detected...
 
   # extract all of the individual haplotype sequences
   haplo <- pegas::haplotype(seqs,
