@@ -13,6 +13,7 @@ probability <- NULL
 oldPopulation <- NULL
 s1 <- s2 <- s3 <- s4 <- s5 <- NULL
 Population <- NULL
+Sample <- NULL
 
 pathogen <- readRDS(here::here("inputs", "pathogen.RDS"))
 
@@ -269,10 +270,26 @@ post.save.joined <- post.save[, 1:4] |>
                      as.data.frame() |>
                      tibble::rownames_to_column("Sample") |>
                      dplyr::mutate(dplyr::across(dplyr::where(is.numeric), \(x) factor(dplyr::na_if(x, -9L)))),
-                   by = "Sample") |>
-  dplyr::select(-1)
+                   by = "Sample")
 
-#
+post.save.joined.supp <- post.save.joined[, c("Sample", "Population", "Decade", "State",
+                                              "ACE1", "AVR-Pia", "AVR-ii", "AVR-Pita1",
+                                              "AVR-Pizt", "AVR-Pi9", "AVR-Pib", "AVR-Piks",
+                                              "pyrm_37",  "pyrm_43", "pyrm_47", "pyrm_63", "pyrm_77",
+                                              "pyrm_233", "pyrm_409", "pyrm_427", "pyrm_607", "pyrm_657")] |>
+  dplyr::relocate("Population", .after = 4) |>
+  dplyr::rename("AVR-Pii" = "AVR-ii",
+                "DAPC Population" = "Population") |>
+  dplyr::arrange(Sample)
+
+write.table(post.save.joined.supp,
+            file = here::here("tables_staged", "Dataset_S1.csv"),
+            row.names = FALSE,
+            col.names = TRUE,
+            sep = ",",
+            quote = FALSE,
+            na = "-")
+
 # vars <- Filter(\(x) length(unique(x)) > 1L, post.save.joined)
 #
 # # drop AVR-Pib because the `0` class is way too small

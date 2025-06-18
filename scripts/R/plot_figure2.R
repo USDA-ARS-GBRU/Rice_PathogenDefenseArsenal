@@ -1,3 +1,5 @@
+here::i_am("scripts/R/plot_figure2.R")
+
 AVR.Global <- AVR.split.Global <- AVR.split.USA <- AVR.USA <- NULL
 Rgenes <- Rgenes.loess <-  NULL
 Rgenes_AVR_over_time <- Rgenes_AVR_over_time2 <- NULL
@@ -5,10 +7,10 @@ Rgenes_AVR_over_time.lag <- Rgenes_AVR_over_time.lag2 <- NULL
 
 AVR <- R <- proportion <- NULL
 
-load(file = "../outputs/source_data_Rgenes_AVR_over_time.RData")
-load(file = "../outputs/source_data_AVR_PA_over_time_USA.RData")
-load(file = "../outputs/source_data_AVR_PA_over_time_Global.RData")
-load(file = "../outputs/source_data_Rgenes.RData")
+load(file = here::here("outputs", "source_data_Rgenes_AVR_over_time.RData"))
+load(file = here::here("outputs", "source_data_AVR_PA_over_time_USA.RData"))
+load(file = here::here("outputs", "source_data_AVR_PA_over_time_Global.RData"))
+load(file = here::here("outputs", "source_data_Rgenes.RData"))
 
 library(extrafont)
 
@@ -251,7 +253,52 @@ f2.ABCD <- ggpubr::ggarrange(f2.ABC, f2.D, #+ ggpubr::rremove("y.ticks") + ggpub
 
 f2.ABCD
 
-ggplot2::ggsave(plot = f2.ABCD, filename = "../figures/Figure_2.png",
+ggplot2::ggsave(plot = f2.ABCD, filename = here::here("figures", "Figure_2.png"),
                 dpi = 600, width = 7.5, height = 5, scale = 1.75)
 
+State <- Detected <- NULL
+
+## construct Dataset.S2
+out <- AVR.Global[, c("ID", "AVR", "Detected", "PRJNA Project", "Year_Collected", "Place/Region")] |>
+  tidyr::pivot_wider(names_from = AVR, values_from = Detected) |>
+  dplyr::rename("Sample" = "ID")
+
+out2 <- AVR.USA |>
+  tidyr::pivot_wider(names_from = AVR, values_from = Detected) |>
+  dplyr::mutate("PRJNA Project" = NA_character_, .after = 1) |>
+  dplyr::relocate(State, .after = 4) |>
+  dplyr::mutate(State = paste0("USA - ", State)) |>
+  dplyr::rename("Place/Region" = "State")
+
+out2 <- out2[, colnames(out)]
+
+out <- rbind(out2, out)
+
+rm(out2)
+
+Year_Collected <-  `Place/Region` <- Year <- NULL
+
+write.table(out |>
+              dplyr::arrange(Year_Collected, `Place/Region`),
+            file = here::here("tables_staged", "Dataset_S2.csv"),
+            row.names = FALSE,
+            col.names = TRUE,
+            sep = ",",
+            quote = FALSE,
+            na = "-")
+
+rm(out)
+
+out <- Rgenes |>
+  tidyr::pivot_wider(names_from = R, values_from = proportion) |>
+  dplyr::arrange(State, Year) |>
+  dplyr::mutate(dplyr::across(dplyr::where(is.double), \(x) sprintf("%0.4f", x)))
+
+write.table(out,
+            file = here::here("tables_staged", "Dataset_S3.csv"),
+            row.names = FALSE,
+            col.names = TRUE,
+            sep = ",",
+            quote = FALSE,
+            na = "-")
 

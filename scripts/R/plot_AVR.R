@@ -1,14 +1,15 @@
-setwd("../../inputs")
+here::i_am("scripts/R/plot_AVR.R")
 
 library(extrafont)
 
 Present <- NULL
 
 
-AVR <- readRDS(file = "pathogen.RDS")[, c(3, 5:12)] |>
-  tidyr::pivot_longer(-1, names_to = "AVR", values_to = "Detected") |>
+AVR <- readRDS(file = here::here("inputs", "pathogen.RDS"))[, c(1, 4, 3, 5:12)] |>
+  tidyr::pivot_longer(-c(1:3), names_to = "AVR", values_to = "Detected") |>
   dplyr::rename("Year_Collected" = "Year") |>
-  dplyr::mutate(AVR = stringr::str_replace_all(AVR, "AVR-ii", "AVR-Pii"))
+  dplyr::mutate(AVR = stringr::str_replace_all(AVR, "AVR-ii", "AVR-Pii")) |>
+  dplyr::rename("Sample" = "PCR ID")
 
 # estimate some smooths from mgcv
 AVR.split <- split(AVR, AVR$AVR) |>
@@ -67,7 +68,7 @@ g <- ggplot2::ggplot(AVR,
 
 g
 ggplot2::ggsave(g,
-                filename = "../figures/AVR_over_time.png",
+                filename = here::here("figures", "AVR_over_time.png"),
                 width = 6,
                 height = 3,
                 dpi = 600,
@@ -79,5 +80,5 @@ AVR.split.USA <- AVR.split
 
 save(AVR.USA,
      AVR.split.USA,
-     file = "../outputs/source_data_AVR_PA_over_time_USA.RData")
+     file = here::here("outputs", "source_data_AVR_PA_over_time_USA.RData"))
 

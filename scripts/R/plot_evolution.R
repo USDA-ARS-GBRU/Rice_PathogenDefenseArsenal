@@ -125,6 +125,10 @@ hclust(AA.Piks.dist, method = "complete") |>
 plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pita1", "cds.aln.fasta"),
                              img = here::here("figures", "Pita1.png"),
                              metadata = meta) {
+  gene <- fs::path_ext_remove(basename(img)) |>
+    stringr::str_replace_all("haplotype\\_network\\_",
+                             "")
+
   seqs <- adegenet::fasta2DNAbin(fa)
 
   # extract all of the individual haplotype sequences
@@ -140,6 +144,36 @@ plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pit
   # get the groupings
   haplo.index.list <- attr(haplo, "index")
   names(haplo.index.list) <- dimnames(haplo)[[1]]
+
+
+  # make the group assignments for putting in to a supp table
+  supp <- data.frame("Sample" = dimnames(seqs)[[1]]) |>
+    dplyr::left_join(lapply(haplo.index.list,
+                            \(x) data.frame("Sample" = dimnames(seqs)[[1]][x])) |>
+                       purrr::list_rbind(names_to = "hap"),
+                     by = "Sample") |>
+    dplyr::left_join(metadata[, c("Sample", "Domestic")],
+                     by = "Sample") |>
+    dplyr::mutate(Domestic = tidyr::replace_na(ifelse(Domestic, "Yes", "No"),
+                                               "No")) |>
+    dplyr::left_join(adegenet::DNAbin2genind(seqs) |>
+                       adegenet::genind2df() |>
+                       tibble::rownames_to_column("Sample"),
+                     "Sample")
+
+  if (gene == "Piks") {
+    fname = here::here("tables_staged", "Dataset_S5.csv")
+  } else {
+    fname = here::here("tables_staged", "Dataset_S4.csv")
+  }
+
+  write.table(supp,
+              file = fname,
+              row.names = FALSE,
+              col.names = TRUE,
+              sep = ",",
+              quote = FALSE,
+              na = "-")
 
   # check if any of the samples from the US
   # RED = only US
@@ -239,9 +273,6 @@ plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pit
        vertex.label.degree = -pi/2,
        add = TRUE, family = "Arial")
 
-  gene <- fs::path_ext_remove(basename(img)) |>
-    stringr::str_replace_all("haplotype\\_network\\_",
-                             "")
 
   if (gene == "Piks") {
     legend("bottomright",
