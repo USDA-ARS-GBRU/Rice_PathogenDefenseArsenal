@@ -143,6 +143,8 @@ plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pit
 
   seqs <- seqs[!dimnames(seqs)[[1]] %in% bad, ]
 
+  saveRDS(seqs, file = here::here("outputs", paste0(gene, "_dnabin.RDS")))
+
   # subset seqs to drop individuals that didn't actually have the gene detected...
 
   # extract all of the individual haplotype sequences
@@ -290,12 +292,15 @@ plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pit
 
   if (gene == "Piks") {
     legend("bottomright",
-           legend = c("U.S.", "World"),
+           legend = c("U.S.", "Global"),
            col = c("salmon2", "lightblue"),
-           pch = 19, inset = c(0.05, 0.05))
+           pch = 19, inset = c(0.05, 0.05),
+           cex = 3)
   }
 
-  title(main = gene, line = -1, family = "Arial", font = 1)
+  # left align the title
+  # https://stackoverflow.com/questions/15077124/how-to-left-align-a-title-in-r-plot
+  title(main = ifelse(gene == "Pita1", "A", "B"), line = -1, family = "Arial", font = 1)
   dev.off()
   }
 
