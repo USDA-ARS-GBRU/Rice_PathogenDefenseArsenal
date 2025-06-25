@@ -283,7 +283,7 @@ plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pit
        layout = lay,
        vertex.size = 0,
        rescale = FALSE,
-       vertex.label.cex = 0.75,
+       vertex.label.cex = 0.85,
        vertex.label.color = "black",
        vertex.label.dist = 12,
        vertex.label.degree = -pi/2,
@@ -298,9 +298,6 @@ plot_msa_network <- function(fa = here::here("sequences", "AVR_Alignments", "Pit
            cex = 3)
   }
 
-  # left align the title
-  # https://stackoverflow.com/questions/15077124/how-to-left-align-a-title-in-r-plot
-  title(main = ifelse(gene == "Pita1", "A", "B"), line = -1, family = "Arial", font = 1)
   dev.off()
   }
 
@@ -311,10 +308,10 @@ plot_msa_network(fa = here::here("sequences", "AVR_Alignments", "Piks", "cds.aln
                  img = here::here("figures", "haplotype_network_Piks.png"))
 
 # https://stackoverflow.com/questions/25360248/arrange-multiple-32-png-files-in-a-grid
-plot1 <- png::readPNG(here::here("figures", "haplotype_network_Pita1.png"))
-plot2 <- png::readPNG(here::here("figures", "haplotype_network_Piks.png"))
-
-tmp <- gridExtra::arrangeGrob(grid::rasterGrob(plot1), grid::rasterGrob(plot2), nrow = 1)
-
-ggplot2::ggsave(here::here("figures", "Figure_4.png"), tmp, width = 14, height = 7)
-
+# plot1 <- png::readPNG(here::here("figures", "haplotype_network_Pita1.png"))
+# plot2 <- png::readPNG(here::here("figures", "haplotype_network_Piks.png"))
+#
+# tmp <- gridExtra::arrangeGrob(grid::rasterGrob(plot1), grid::rasterGrob(plot2), nrow = 1)
+#
+# ggplot2::ggsave(here::here("figures", "Figure_4.png"), tmp, width = 14, height = 7)
+#
