@@ -50,16 +50,18 @@ aln.new[] <- aln.new - 1L
 aln[] <- aln.new
 
 width <- 50
-pl <- lapply(seq(from = 1, to = nrow(aln) - width, by = 5),
-       \(x) seq(from = x, to = x + width)) |>
-  lapply(\(x) genomicpp::rcpp_parallel_tajimas_d(aln[x, ])) |>
-  lapply(as.data.frame) |>
-  lapply(t) |>
-  lapply(as.data.frame) |>
-  purrr::list_rbind()
 
-plot(pl$pi, type = "l")
-plot(pl$D, type = "l")
+split(meta$Sample, meta$Domestic) |>
+  lapply(\(ZZ) {
+    pl <- lapply(seq(from = 1, to = nrow(aln) - width, by = 5),
+           \(x) seq(from = x, to = x + width)) |>
+      lapply(\(x) genomicpp::rcpp_parallel_tajimas_d(aln[x, colnames(aln) %in% ZZ])) |>
+      lapply(as.data.frame) |>
+      lapply(t) |>
+      lapply(as.data.frame) |>
+      purrr::list_rbind()
 
-plot(pl$pi, pl$D)
+    plot(pl$pi, type = "l")
+    plot(pl$D, type = "l")
+})
 
