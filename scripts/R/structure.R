@@ -290,54 +290,56 @@ write.table(post.save.joined.supp,
             quote = FALSE,
             na = "-")
 
-# vars <- Filter(\(x) length(unique(x)) > 1L, post.save.joined)
-#
-# # drop AVR-Pib because the `0` class is way too small
-# vars <- subset(vars, select = -`AVR-Pib`)
-#
-# # rearrange to alphabetize
-# vars <- vars[, c(1, 2, 3, 6, 7, 5, 4, 8, 10, 13, 14, 16, 18, 9, 11, 12, 15, 17)]
-#
-# vars.mat <- matrix(data = NA_real_, nrow = ncol(vars), ncol = ncol(vars),
-#                    dimnames = list(colnames(vars), colnames(vars)))
-#
-# pvals.mat <- matrix(data = NA_real_, nrow = ncol(vars), ncol = ncol(vars),
-#                    dimnames = list(colnames(vars), colnames(vars)))
-#
-# vars.mat[lower.tri(vars.mat)] <- combn(vars,
-#                                        2,
-#                                        \(x) chisq.test(x = x[[1]],
-#                                                        y = x[[2]])$statistic,
-#                                        simplify = TRUE)
-#
+vars <- Filter(\(x) length(unique(x)) > 1L, post.save.joined)
+
+# drop AVR-Pib because the `0` class is way too small
+vars <- subset(vars, select = -`AVR-Pib`)
+
+# rearrange to alphabetize
+vars <- vars[, c(1, 2, 3, 6, 7, 5, 4, 8, 10, 13, 14, 16, 18, 9, 11, 12, 15, 17)]
+
+vars.mat <- matrix(data = NA_real_, nrow = ncol(vars), ncol = ncol(vars),
+                   dimnames = list(colnames(vars), colnames(vars)))
+
+pvals.mat <- matrix(data = NA_real_, nrow = ncol(vars), ncol = ncol(vars),
+                   dimnames = list(colnames(vars), colnames(vars)))
+
+vars.mat[lower.tri(vars.mat)] <- combn(vars,
+                                       2,
+                                       \(x) chisq.test(x = x[[1]],
+                                                       y = x[[2]])$statistic,
+                                       simplify = TRUE)
+
 # pvals.mat[lower.tri(pvals.mat)] <- combn(vars,
 #                                          2,
 #                                          \(x) chisq.test(x = x[[1]],
 #                                                          y = x[[2]]) |>
 #                                            confintr::cramersv(),
 #                                          simplify = TRUE)
-#
-# H0 <- combn(vars,
-#             2,
-#             \(x) vapply(1:2000,
-#                         \(y) tryCatch(chisq.test(x = sample(x = x[[1]]),
-#                                                  y = x[[2]])$statistic,
-#                                       error = \(e) NA_real_),
-#                         numeric(1)))
-#
-# xobs <- vars.mat[lower.tri(vars.mat)]
-#
-# pvals.mat[lower.tri(pvals.mat)] <-  mapply(\(x, y) mean(x < y, na.rm = TRUE),
-#                                            as.data.frame(H0),
-#                                            xobs) |>
-#   unname()
-#
-# pvals.mat[upper.tri(pvals.mat)] <- t(pvals.mat)[upper.tri(pvals.mat)]
-#
-# corrplot::corrplot(pvals.mat, is.corr = FALSE, addshade = "positive",
-#                    type = "upper", diag = FALSE,
-#                    method = "shade",
-#                    col = rev(corrplot::COL1("Purples", n = 100)))
+
+H0 <- combn(vars,
+            2,
+            \(x) vapply(1:2000,
+                        \(y) tryCatch(chisq.test(x = sample(x = x[[1]]),
+                                                 y = x[[2]])$statistic,
+                                      error = \(e) NA_real_),
+                        numeric(1)))
+
+xobs <- vars.mat[lower.tri(vars.mat)]
+
+pvals.mat[lower.tri(pvals.mat)] <-  mapply(\(x, y) mean(x < y, na.rm = TRUE),
+                                           as.data.frame(H0),
+                                           xobs) |>
+  unname()
+
+pvals.mat[upper.tri(pvals.mat)] <- t(pvals.mat)[upper.tri(pvals.mat)]
+
+pvals.mat <- pvals.mat[-1,-1]
+
+corrplot::corrplot(pvals.mat, is.corr = FALSE, addshade = "positive",
+                   type = "lower", diag = FALSE,
+                   method = "number",
+                   col = rev(corrplot::COL1("Purples", n = 50)[10:50]))
 
 
 # save membership probabilities
