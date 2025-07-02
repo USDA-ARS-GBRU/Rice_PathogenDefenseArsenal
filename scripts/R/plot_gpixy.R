@@ -35,6 +35,10 @@ quantile(regions$D, 0:20/20)
 regions <- regions |>
   tidyr::separate(NAME, into = c("type", "extra"), extra = "merge",
                   remove = FALSE)
+
+ecdf.D <- subset(regions, D < 5 & STOP - START + 1L > 50L & type == "exon", select = D, drop = TRUE) |>
+  sort()
+
 #
 # ecdfs.D <- split(regions$D, regions$type)
 #
