@@ -168,6 +168,6 @@ f5.ABC <- ggpubr::ggarrange(f5.AB, g3,
                            labels = c("", "C"),
                            font.label = list(size = 16, color = "black", face = "bold", family = "Arial"))
 
-ggplot2::ggsave(plot = f5.ABC, filename = "../figures/Figure_5.png",
+ggplot2::ggsave(plot = f5.ABC, filename = here::here("figures" ,"Figure_5_ecdf.png"),
                 dpi = 600, width = 7.5, height = 2.5, scale = 3)
 
