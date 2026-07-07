@@ -1,0 +1,115 @@
+NPH-MS-2026-56468 - Full Paper -  Avirulence genes of Magnaporthe oryzae are a pathogen defense arsenal shaped by cognate rice resistance genes in the field
+by Wang, Xueyan; Billings, Grant; Hulse-Kemp, Amanda; Read, Quentin; Jia, Yulin; Jia, Melissa; Huang, Yixiao; Wamishe, Yeshi; Valent, Barbara
+
+Dear Dr Jia,
+
+We have now received four expert reviews on the resubmitted version of your research manuscript entitled "Avirulence genes of Magnaporthe oryzae are a pathogen defense arsenal shaped by cognate rice resistance genes in the field", which you can find below in detail. Based on the reports received, I feel that your work is likely to become ultimately acceptable for publication in New Phytologist upon major revision. As you can see, the referees appreciate the value of your data, yet also raise some concerns regarding your study. For example, reviewer #1 argues: "The six-decade dataset offers a valuable opportunity to examine pathogen evolutionary dynamics. However, several concerns need to be addressed". Along similar lines, reviewer #2 states: "Nevertheless, I feel that the authors seem not familiar with the updated knowledge in our understanding of rice - M. oryzae interactions, particularly the interaction of Pik and AVR-Pik. Therefore, I suggest the authors re-analyze their highly valuable data and make more accurate conclusions". Reviewer #3 also lists some suggestions for improvement, and reviewer #4 concludes: "The objective and overall approach of the study are good.
+That said, I have difficulties in some results and the interpretation of data". I encourage you to address the reviewer concerns in a substantially revised version of your manuscript, which I expect by 31st July 2026 at the very latest.
+
+Sincerely,
+
+Ralph Panstruga
+Editor, New Phytologist
+
+*****************************************************************
+To revise your manuscript please click on the link below
+*** PLEASE NOTE: This is a two-step process. After clicking on the link, you will be directed to a webpage to confirm. ***
+
+https://mc.manuscriptcentral.com/newphytologist?URL_MASK=daeae83d655b4c09a2f36a2887e366da
+
+Alternatively log on to New Phytologist ScholarOne Manuscripts:
+http://mc.manuscriptcentral.com/newphytologist
+
+Enter your Author Centre.
+
+Under the 'My Manuscripts' list click on 'Manuscripts with Decisions'. From the list of manuscripts click the 'create a revision' link, next to the manuscript you wish to submit a revision for. From here follow the instructions inputting you responses to the decision letter through to the uploading of your new files.
+Your comments which specifically address the referees' reports and may therefore need to be viewed by new referees should be made in a separate Word file titled 'Response to referees' and uploaded when the actual manuscript files are uploaded. This will usually be a point by point 'response to the referees' reports. It should be designated as being 'for review' when uploaded, as should all manuscript files.
+Please note you will be unable to make your revisions directly on the submitted ScholarOne Manuscripts version of your manuscript. Instead, you should revise your original word processor file, and then submit the revised version. When revising your manuscript, please prepare two versions: 1) the final revised manuscript and 2) the revised manuscript with revision marks showing. The latter file should be designated as a 'document with revision changes highlighted' when uploading.
+
+In any correspondence regarding this manuscript, please include the manuscript reference number and copy the correspondence to New Phytologist Central Office (np-managinged@lancaster.ac.uk).
+*************************************************************
+
+Decision: Major revision advised
+Referee: 1
+
+Comments to the Author
+This study analyzed eight AVR genes in 840 U.S. M. oryzae isolates collected from 1959 to 2017 in relation to the deployment of rice R genes. The six-decade dataset offers a valuable opportunity to examine pathogen evolutionary dynamics. However, several concerns need to be addressed.
+1. Figure 1 shows that 383 U.S. isolates were used for population structure analysis. However, Figure 2A and 3A report "Global (n=383)" and "U.S. (n=832)". The Methods section (DNA sequence analysis) mentions downloading "329" public resequencing samples. Where does the number 383 for the global analysis come from? Is it 329, 383, or another number?
+2. The U.S. isolates were detected by PCR, while the global samples were analyzed by read mapping of public SRA data. These methodological differences in sensitivity and specificity could bias the U.S.-global comparisons in Figures 2 and 3. The authors should discuss this possibility, specifically whether the lower detection rate of certain AVR genes in global samples reflects true biology or technical artifacts such as sequencing coverage or read mapping parameters.
+3. In the methods section, the authors selected the optimal lag time for R gene frequency by searching over 0-15 years and choosing the lag with the lowest p-value in a generalized linear mixed model. This approach does not account for multiple comparisons, which may lead to overfitting and inflated type I error rates.
+4. In Figure 4, the authors highlight four key amino acid residues for AVR-Pita1 and AVR-Pik (NQCR, HADM, NADK, etc.). Are these residues known to be critical for recognition by the cognate R proteins based on previous studies? The authors should provide citations or clarify why these residues were chosen.
+5. Figure 5A shows only one isolate (IB49), but the conclusion is based on multiple isolates. The authors should add images from at least one additional isolate.
+6. AVR-Pia and AVR-Pii are nearly absent in the U.S. population despite decades without deployment of their cognate R genes (Pia and Pii). The authors suggest this may reflect a lack of fitness penalty or that near-total loss prevented recovery (page 23). However, this contrasts with the rapid recovery of AVR-Pita1. The authors should discuss possible reasons for this difference.
+7. The authors repeatedly attribute the recovery of AVR-Pita1 to a "fitness penalty" after Pi-ta removal. However, no direct fitness measurements (e.g., spore production, competitive growth assays) are provided. The frequency data are consistent with, but do not demonstrate, a fitness cost. The authors should either moderate their language or acknowledge this limitation in the Discussion.
+There are many formatting inconsistencies throughout the manuscript:
+1. Page4 L40-42, “$66 billion USD” should be “66 billion USD” or “$66 billion”.
+2. Page13 L281, “Fig S1” should be “Fig. S1”.
+3. Page19 L385, “Mo” should be in italics as “Mo”.
+4. The dataset spans 1959 to 2017. Why 2017 was chosen as the endpoint (currently 2026).
+5. The supplementary materials appear to be incomplete in the manuscript. While Figure S1 is visible, other cited supplementary figures are not included.
+
+
+Referee: 2
+
+Comments to the Author
+This manuscript presented a potential exciting discovery that the presence/ absence of a R gene in rice may drive the evolution of its cognate AVR gene in Magnaporthe oryzae, the causative agent of rice blast disease. Meanwhile, one the R gene was not used in rice varieties, its cognate AVR gene may re-merge. This evolution of M. oryzae is highly valuable to help us in the management of R gene utilization in rice production. Nevertheless, I feel that the authors seem not familiar with the updated knowledge in our understanding of rice - M. oryzae interactions, particularly the interaction of Pik and AVR-Pik. Therefore, I suggest the authors re-analyze their highly valuable data and make more accurate conclusions.
+
+For analysis on Pik# with Avr-Piks, we cannot simply use the frequency data because this allele poses allele-specific recognition: Piks does not recognizes any Avr-Piks but AVR-Mgk1 and thus it should not pose any selection pressure for any AVR-Piks, while Pikm only recognizes AVR-PikA/D/E and it should not pose pressure for AVR-PikB/C. Therefore, the presence of Pikm or Piks may not the reason for the lose of AVR-Pik.
+
+L45-46, here the number of characterized blast resistance genes is out of date from the citation of ten years ago. Please update this number by citing a more recent review such as https://doi.org/10.1016/j.tim.2024.03.006 (Effectors and environment modulating rice blast
+disease: from understanding to effective Control), where mentioned over 50 characterized blast resistance genes.
+L47, are you sure there is a recessive blast resistance gene named “pi-d”?
+
+L400~401, here the variant of HADM for AVR-Pik was reported as H9 by (Li, J., Wang, Q., Li, C. et al. Novel haplotypes and networks of AVR-Pik alleles in Magnaporthe oryzae. BMC Plant Biol 19, 204 (2019). https://doi.org/10.1186/s12870-019-1817-8), whereas NADK variant was named AVR-PikF by https://doi.org/10.1094/MPMI-09-18-0245-R (Gene Duplication and Mutation in the Emergence of a Novel Aggressive Allele of the AVR-Pik Effector in the Rice Blast Fungus). Please be aware this information to re-analyze AVR-Pik alleles.
+
+Figure 2 and related text, I did not know which paper showed ACE1 corresponding pi-d.
+Figure 4A and 4D are not discernible.
+
+Referee: 3
+
+Comments to the Author
+The authors studied the frequency dynamics of AVR effectors in the rice blast pathogen over a 50-year period (1970–2020). The authors show that the shifts in <i>AVR-Pita </i>and <i>AVR-Pik</i> frequencies were dependent on their cognate <i>R</i>-gene frequency. The study found differences in the efficiency of overcoming <i>R</i>-gene selection pressure between <i>AVR-Pita</i> and <i>AVR-Pik</i>, suggesting a potential link to the virulence of <i>AVR-Pik</i>.
+
+Line145―146 The presence/absence criteria based on primer sequence match counting approach is not perfectly accurate. The authors declared “ presence” of AVR gene if both primer sequences were observed at 5 times. If the case of “one, two, three, or four times” is not regarded as “presence”, it is very difficult to judge that “they are really not present”.
+When the frequency of AVR is close to zero over years, it seems to be difficult to accurately estimate “predicted proportion of isolates with cognate AVR gene” such as <i>AVR-Pia</i> in Fig. 2D.  The limitations of the prediction should be discussed.
+It is not clear for me how the authors calculated “predicted prevalence of AVR genes”. Frequency of AVR shows over 1.0 and less than 0.
+The dynamics of proportion of rice acres with <i>Pi-km </i>and <i>Pi-ks</i> differ by state. Although there are limitations due to sample size, could this lead to state-specific differences in the predicted prevalence of AVR genes?
+In Fig.4, due to the poor resolution, it is difficult to know haplotype name.
+Figures 4B and 4E are somewhat difficult to interpret. Do the vertical lines indicate years when isolates carrying the respective haplotype were sampled? Furthermore, do the horizontal lines mean that the haplotype existed throughout that specific period? Although the time of sampling isolates is discrete, rationales for assuming their continuous existence should be explained.
+It is unclear which specific result in Figure 5 supports the statement that "the isolate carrying <i>AVR-Pik-D</i> showed moderate avirulence activity with <i>R</i> gene <i>Pi-km</i> and<i> Pi-kh</i>." Figure 5 shows the inoculation results of 64 isolates with different AVR genes, making it difficult to pinpoint this specific finding. It is not clear which isolates have <i>AVR-Pik-D</i>.
+Could the authors clarify where this is indicated? To discriminate isolates with<i> AVR-Pik-D</i>, it would be better to display a boxplot with jittered, colored points.
+In addition, it is not clear why the authors picked up the disease symptoms of three cultivars.
+It is better to show the results corresponding to the disease index from 0, 1, 2, 3, 4, and 5.
+In M&M, Tajima’s D and nucleotide diversity are stated, but the results of Tajima’s D and nucleotide diversity are not described.
+Table S4 The font should be made consistent, and the formatting needs to be improved.
+In Dataset S1, Please clearly state that ‘pyrm_*’ refers to the names of SSR markers.
+Please indicate what the numbers in the SSR marker column represent.
+It is unclear what the numbers in Dataset S3 indicate.
+Please clarify what the number in the header of Datasets S４ and S５indicates. It seems to be “nucleotide position”.
+
+Referee: 4
+
+Comments to the Author
+Review of the paper entitled “Avirulence genes of Magnaporthe oryzae are a pathogen defense arsenal shaped by cognate rice resistance genes in the field” by Wang et al. submitted to New Phytologist.
+
+This paper addresses the co-evolutionary processes of rice and its pathogen blast fungus caused by Magnaporthe oryzae. Focusing on the United States, the authors carried out a census study of 840 historical samples of M. oryzae collected from the field during the period of 1959-2017 and the acreage of 160 rice varieties planted during the same period. For the pathogen samples, the authors determined their genotypes of 8 AVR genes by PCR and inferred the changes of allele frequencies over time. For rice, using information of acreage of rice varieties, changes of the frequencies of R-genes cognate to the pathogen AVR genes were inferred. The findings include, 1) higher frequencies were observed for AVR genes for which cognate R-genes were not deployed in US (AVR-Pi9, AVR-Pib, ACE1 and AVR-Pizt) (Fig.S1,Fig.2); 2) AVR-Pita gene frequency negatively correlates with the Pita frequency with a time lag (Fig.2); 3) AVR-Pik gene frequency negatively correlates with Pikm/Piks frequencies with a time lag (Fig.3).
+
+Plant R-genes impose direct selection to cognate pathogen AVR genes, so that population frequencies of R-genes and AVR-genes are predicted to show a time-lagged negative correlation. However, empirical study of R gene-AVR-gene coevolutionary processes has been scarce. This study aims to elucidate this process using historical data of rice and blast pathogen. The objective and overall approach of the study are good.
+That said, I have difficulties in some results and the interpretation of data.
+
+Major:
+1/ In Fig.2C, Pita frequency increase to 0.5 seems observed only in AR state, but AVR-Pita frequency decline is observed for the entire US. How such a limited use of R-gene impacts the frequency of AVR in the entire US population is difficult to understand. Also, biological reasoning of the high sensitivity of AVR-Pita to Pita as modeled in Fig.2D is not provided. Related to this, the low sensitivity of AVR-Pizt to Pizt (Fig.2D) should be explained.
+2/ In Fig.3, frequencies of AVR-Pik (Fig. 3B) and Pi-km and Pi-ks (Fig.3C) are given. Pi-km recognizes a large proportion of AVR-Pik alleles, but Pi-ks does not recognize any of AVR-Pik alleles (see Sugihara et al. https://doi.org/10.1371/journal.pbio.3001945).
+Therefore, I find it difficult to see the relevance of Pi-ks frequency affecting AVR-Pik frequency. Also, there is no explanation of the reduction of AVR-Pik after 2015 (Fig.3B) despite the reduction of Pi-km use after ~2005 (Fig.3C).
+3/ Genealogy of AVR genes and their duration periods in the populations as given in Fig.4 are interesting. However, it would be more informative to interpret the data in the light of deployment of cognate Pita and Pik alleles.
+4/ Explanation of the results in Fig.5 is difficult to follow.
+5/ Linking frequencies of clonal lineages and AVR repertoire would make the paper really meaningful. However the current inference on clonal lineages with only 5 SSR markers seems to be limited.
+
+Minor:
+Fig.4 title: This figure does not explain any evolutionary mechanisms. “Genealogy and amino acid polymorphism of two AVR genes” would be more appropriate.
+Fig.5:  Title and the content is difficult to follow.
+
+******************************************************
+This journal offers a number of license options for published papers; information about this is available here: https://authorservices.wiley.com/author-resources/Journal-Authors/licensing/index.html. The submitting author has confirmed that all co-authors have the necessary rights to grant in the submission, including in light of each co-author’s funder policies. If any author’s funder has a policy that restricts which kinds of license they can sign, for example if the funder is a member of Coalition S, please make sure the submitting author is aware.
+
+
